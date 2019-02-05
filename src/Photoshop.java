@@ -19,6 +19,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;  
@@ -31,8 +32,6 @@ import javafx.stage.Stage;
 public class Photoshop extends Application 
 {
 
-	private static final double GAMMA_VALUE = 2.8;
-	
     @Override
     public void start(Stage stage) throws FileNotFoundException 
     {
@@ -52,7 +51,9 @@ public class Photoshop extends Application
 		Button contrast_button = new Button("Contrast Stretching");
 		Button histogram_button = new Button("Histograms");
 		Button cc_button = new Button("Cross Correlation");
-		
+		TextField gammaInput = new TextField();
+		gammaInput.setPromptText("Type in gamma value here");
+        
 		//Add all the event handlers (this is a minimal GUI - you may try to do better)
 		invert_button.setOnAction(new EventHandler<ActionEvent>() 
 		{
@@ -78,7 +79,8 @@ public class Photoshop extends Application
             {
                 System.out.println("Gamma Correction");
                 
-                Image correctedImage = gammaCorrecter(originalImageView.getImage());
+                double gammaValue = Double.parseDouble(gammaInput.getText());
+                Image correctedImage = gammaCorrecter(originalImageView.getImage(), gammaValue);
                 imageView.setImage(correctedImage);
             }
         });
@@ -110,6 +112,7 @@ public class Photoshop extends Application
             }
         });
 		
+		
 		//Using a flow pane
 		FlowPane root = new FlowPane();
 		//Gaps between buttons
@@ -117,7 +120,7 @@ public class Photoshop extends Application
         root.setHgap(5);
 
 		//Add all the buttons and the image for the GUI
-		root.getChildren().addAll(invert_button, gamma_button, contrast_button, histogram_button, cc_button, imageView);
+		root.getChildren().addAll(invert_button, gamma_button, contrast_button, histogram_button, cc_button, gammaInput, imageView);
 
 		//Display to user
         Scene scene = new Scene(root, 1024, 768);
@@ -154,7 +157,7 @@ public class Photoshop extends Application
 		return inverted_image;
 	}
 	
-	public Image gammaCorrecter(Image image)
+	public Image gammaCorrecter(Image image, double gammaValue)
 	{
 		int width = (int)image.getWidth();
 		int height = (int)image.getHeight();
@@ -170,9 +173,9 @@ public class Photoshop extends Application
 			{
 				Color pixelColor = imageReader.getColor(x, y);
 				
-				int correctedRed = (int)(255*Math.pow(pixelColor.getRed(), 1.0/GAMMA_VALUE));
-				int correctedGreen = (int)(255*Math.pow(pixelColor.getGreen(), 1.0/GAMMA_VALUE));
-				int correctedBlue = (int)(255*Math.pow(pixelColor.getBlue(), 1.0/GAMMA_VALUE));
+				int correctedRed = (int)(255*Math.pow(pixelColor.getRed(), 1.0/gammaValue));
+				int correctedGreen = (int)(255*Math.pow(pixelColor.getGreen(), 1.0/gammaValue));
+				int correctedBlue = (int)(255*Math.pow(pixelColor.getBlue(), 1.0/gammaValue));
 				
 				Color correctedColor = Color.rgb(correctedRed, correctedGreen, correctedBlue);
 				
