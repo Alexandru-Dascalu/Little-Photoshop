@@ -37,13 +37,19 @@ public class Photoshop extends Application
 
     private double gammaValue;
     
+    public Photoshop()
+    {
+        gammaValue = 1.0;
+        computeGammaLookUpTable();
+    }
+    
     @Override
     public void start(Stage stage) throws FileNotFoundException 
     {
 		stage.setTitle("Photoshop");
 
 		//Read the image
-		Image image = new Image(new FileInputStream("raytrace.jpg"));  
+		Image image = new Image(new FileInputStream("Far Cry 3.png"));  
 
 		//Create the graphical view of the image
 		ImageView imageView = new ImageView(image); 
@@ -84,9 +90,7 @@ public class Photoshop extends Application
             {
                 System.out.println("Gamma Correction");
                 
-                double gammaValue = Double.parseDouble(gammaInput.getText());
-                imageView.setImage(image);
-                Image correctedImage = gammaCorrecter(imageView.getImage());
+                Image correctedImage = gammaCorrecter(image);
                 imageView.setImage(correctedImage);
             }
         });
