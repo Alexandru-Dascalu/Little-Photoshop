@@ -90,8 +90,11 @@ public class Photoshop extends Application
             {
                 System.out.println("Gamma Correction");
                 
-                Image correctedImage = gammaCorrecter(image);
+                long start = System.currentTimeMillis();
+                //Image correctedImage = gammaCorrecter(image);
+                Image correctedImage = gammaCorrecter(image, Double.parseDouble(gammaInput.getText()));
                 imageView.setImage(correctedImage);
+                System.out.println(System.currentTimeMillis()-start);
             }
         });
 
@@ -235,6 +238,35 @@ public class Photoshop extends Application
 		
 		return correctedImage;
 	}
+	
+	public Image gammaCorrecter(Image image, double gammaValue)
+    {
+        int width = (int)image.getWidth();
+        int height = (int)image.getHeight();
+        
+        WritableImage correctedImage = new WritableImage(width, height);
+        
+        PixelWriter correctedImageWriter = correctedImage.getPixelWriter();
+        PixelReader imageReader = image.getPixelReader();
+        
+        for(int y = 0; y < height; y++)
+        {
+            for(int x = 0; x < width; x++)
+            {
+                Color pixelColor = imageReader.getColor(x, y);
+                
+                int correctedRed = (int)(255*Math.pow(pixelColor.getRed(), 1.0/gammaValue));
+                int correctedGreen = (int)(255*Math.pow(pixelColor.getGreen(), 1.0/gammaValue));
+                int correctedBlue = (int)(255*Math.pow(pixelColor.getBlue(), 1.0/gammaValue));
+                
+                Color correctedColor = Color.rgb(correctedRed, correctedGreen, correctedBlue);
+                
+                correctedImageWriter.setColor(x, y, correctedColor);
+            }
+        }
+        
+        return correctedImage;
+    }
 		
     public static void main(String[] args) 
     {
