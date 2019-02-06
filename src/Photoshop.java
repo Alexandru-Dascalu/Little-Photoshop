@@ -31,7 +31,12 @@ import javafx.stage.Stage;
 
 public class Photoshop extends Application 
 {
+    private static final int BYTE_LIMIT = 256; 
+    
+    private int[] gammaLookupTable;
 
+    private double gammaValue;
+    
     @Override
     public void start(Stage stage) throws FileNotFoundException 
     {
@@ -43,16 +48,16 @@ public class Photoshop extends Application
 		//Create the graphical view of the image
 		ImageView imageView = new ImageView(image); 
 		
-		ImageView originalImageView = new ImageView(image);
-		
 		//Create the simple GUI
 		Button invert_button = new Button("Invert");
 		Button gamma_button = new Button("Gamma Correct");
 		Button contrast_button = new Button("Contrast Stretching");
 		Button histogram_button = new Button("Histograms");
 		Button cc_button = new Button("Cross Correlation");
+		Button resetButton = new Button("Reset Image");
+		Button saveGammaButton = new Button("Save Gamma Value");
+		Label gammaInputLabel = new Label("Gamma value:");
 		TextField gammaInput = new TextField();
-		gammaInput.setPromptText("Type in gamma value here");
         
 		//Add all the event handlers (this is a minimal GUI - you may try to do better)
 		invert_button.setOnAction(new EventHandler<ActionEvent>() 
@@ -80,7 +85,8 @@ public class Photoshop extends Application
                 System.out.println("Gamma Correction");
                 
                 double gammaValue = Double.parseDouble(gammaInput.getText());
-                Image correctedImage = gammaCorrecter(originalImageView.getImage(), gammaValue);
+                imageView.setImage(image);
+                Image correctedImage = gammaCorrecter(imageView.getImage(), gammaValue);
                 imageView.setImage(correctedImage);
             }
         });
@@ -112,6 +118,25 @@ public class Photoshop extends Application
             }
         });
 		
+		resetButton.setOnAction(new EventHandler<ActionEvent>()
+		{
+		    @Override
+		    public void handle(ActionEvent event)
+		    {
+		        imageView.setImage(image);
+		    }
+		});
+		
+		saveGammaButton.setOnAction(new EventHandler<ActionEvent>()
+		{
+		    @Override
+		    public void handle(ActionEvent event)
+		    {
+		        String gammaText = gammaInput.getText();
+		        gammaValue = Double.parseDouble(gammaInput.getText());
+		        computeGammaLookUpTable();
+		    }
+		});
 		
 		//Using a flow pane
 		FlowPane root = new FlowPane();
@@ -120,7 +145,9 @@ public class Photoshop extends Application
         root.setHgap(5);
 
 		//Add all the buttons and the image for the GUI
-		root.getChildren().addAll(invert_button, gamma_button, contrast_button, histogram_button, cc_button, gammaInput, imageView);
+		root.getChildren().addAll(invert_button, gamma_button, contrast_button,
+		    histogram_button, cc_button, resetButton, gammaInputLabel, gammaInput,
+		    saveGammaButton,  imageView);
 
 		//Display to user
         Scene scene = new Scene(root, 1024, 768);
@@ -157,6 +184,22 @@ public class Photoshop extends Application
 		return inverted_image;
 	}
 	
+	private void computeGammaLookUpTable()
+	{
+	    gammaLookupTable = new int[BYTE_LIMIT];
+	    for(int i=0; i < BYTE_LIMIT; i++)
+	    {
+	        int correctedValue = (int)(255*Math.pow(i/255.0, 1.0/gammaValue));
+	        gammaLookupTable[i] = correctedValue;
+	    }
+	}
+	
+	private int getCorrectedValue(double colour)
+	{
+	    int integerColour = (int)(colour*255);
+	    return gammaLookupTable[integerColour];
+	}
+	
 	public Image gammaCorrecter(Image image, double gammaValue)
 	{
 		int width = (int)image.getWidth();
@@ -173,9 +216,9 @@ public class Photoshop extends Application
 			{
 				Color pixelColor = imageReader.getColor(x, y);
 				
-				int correctedRed = (int)(255*Math.pow(pixelColor.getRed(), 1.0/gammaValue));
-				int correctedGreen = (int)(255*Math.pow(pixelColor.getGreen(), 1.0/gammaValue));
-				int correctedBlue = (int)(255*Math.pow(pixelColor.getBlue(), 1.0/gammaValue));
+				int correctedRed = getCorrectedValue(pixelColor.getRed());
+				int correctedGreen = getCorrectedValue(pixelColor.getGreen());
+				int correctedBlue = getCorrectedValue(pixelColor.getBlue());
 				
 				Color correctedColor = Color.rgb(correctedRed, correctedGreen, correctedBlue);
 				
