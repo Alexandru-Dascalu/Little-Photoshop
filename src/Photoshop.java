@@ -133,8 +133,11 @@ public class Photoshop extends Application
 		    public void handle(ActionEvent event)
 		    {
 		        String gammaText = gammaInput.getText();
-		        gammaValue = Double.parseDouble(gammaInput.getText());
-		        computeGammaLookUpTable();
+		        if(!gammaText.equals(""))
+		        {
+		            gammaValue = Double.parseDouble(gammaInput.getText());
+	                computeGammaLookUpTable();
+		        }
 		    }
 		});
 		
