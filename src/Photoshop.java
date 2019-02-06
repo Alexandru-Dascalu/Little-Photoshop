@@ -49,7 +49,7 @@ public class Photoshop extends Application
 		stage.setTitle("Photoshop");
 
 		//Read the image
-		Image image = new Image(new FileInputStream("Far Cry 3.png"));  
+		Image image = new Image(new FileInputStream("raytrace.jpg"));  
 
 		//Create the graphical view of the image
 		ImageView imageView = new ImageView(image); 
@@ -91,8 +91,8 @@ public class Photoshop extends Application
                 System.out.println("Gamma Correction");
                 
                 long start = System.currentTimeMillis();
-                //Image correctedImage = gammaCorrecter(image);
-                Image correctedImage = gammaCorrecter(image, Double.parseDouble(gammaInput.getText()));
+                Image correctedImage = gammaCorrecter(image);
+                //Image correctedImage = gammaCorrecter(image, Double.parseDouble(gammaInput.getText()));
                 imageView.setImage(correctedImage);
                 System.out.println(System.currentTimeMillis()-start);
             }
