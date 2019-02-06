@@ -86,7 +86,7 @@ public class Photoshop extends Application
                 
                 double gammaValue = Double.parseDouble(gammaInput.getText());
                 imageView.setImage(image);
-                Image correctedImage = gammaCorrecter(imageView.getImage(), gammaValue);
+                Image correctedImage = gammaCorrecter(imageView.getImage());
                 imageView.setImage(correctedImage);
             }
         });
@@ -203,7 +203,7 @@ public class Photoshop extends Application
 	    return gammaLookupTable[integerColour];
 	}
 	
-	public Image gammaCorrecter(Image image, double gammaValue)
+	public Image gammaCorrecter(Image image)
 	{
 		int width = (int)image.getWidth();
 		int height = (int)image.getHeight();
