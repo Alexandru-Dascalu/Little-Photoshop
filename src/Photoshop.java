@@ -149,15 +149,21 @@ public class Photoshop extends Application
 		});
 		
 		//Using a flow pane
-		FlowPane root = new FlowPane();
+		BorderPane root = new BorderPane();
+		
+		FlowPane topElements = new FlowPane();
+		
 		//Gaps between buttons
-		root.setVgap(10);
-        root.setHgap(5);
+		topElements.setVgap(10);
+		topElements.setHgap(5);
 
 		//Add all the buttons and the image for the GUI
-		root.getChildren().addAll(invert_button, gamma_button, contrast_button,
+		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
 		    histogram_button, cc_button, resetButton, gammaInputLabel, gammaInput,
-		    saveGammaButton,  imageView);
+		    saveGammaButton);
+		
+		root.setTop(topElements);
+		root.setCenter(imageView);
 
 		//Display to user
         Scene scene = new Scene(root, 1024, 768);
