@@ -114,6 +114,9 @@ public class Photoshop extends Application
 			public void handle(ActionEvent event)
 			{
 				System.out.println("Contrast Stretching");
+				
+				Image stretchedImage = contrastStretcher(image);
+				imageView.setImage(stretchedImage);
 			}
 		});
 
@@ -292,11 +295,36 @@ public class Photoshop extends Application
 	
 	public Image contrastStretcher(Image image)
 	{
-		return null;
+		int width = (int) image.getWidth();
+		int height = (int) image.getHeight();
+
+		WritableImage correctedImage = new WritableImage(width, height);
+
+		PixelWriter correctedImageWriter = correctedImage.getPixelWriter();
+		PixelReader imageReader = image.getPixelReader();
+
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				Color pixelColor = imageReader.getColor(x, y);
+
+				int correctedRed = getContrastStretchedValue(pixelColor.getRed());
+				int correctedGreen = getContrastStretchedValue(pixelColor.getGreen());
+				int correctedBlue = getContrastStretchedValue(pixelColor.getBlue());
+
+				Color correctedColor = Color.rgb(correctedRed, correctedGreen, correctedBlue);
+
+				correctedImageWriter.setColor(x, y, correctedColor);
+			}
+		}
+
+		return correctedImage;
 	}
 
-	public int getContrastStretchedValue(int colour)
+	public int getContrastStretchedValue(double colourValue)
 	{
+		int colour = (int) (colourValue * (BYTE_LIMIT - 1));
 		if(colour < r1)
 		{
 			int correctedColour = (int) (((double)s1)/r1 * colour);
