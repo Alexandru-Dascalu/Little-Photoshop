@@ -18,15 +18,19 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
@@ -365,10 +369,35 @@ public class Photoshop extends Application
 		contrastInput.setWidth(300);
 		contrastInput.setTitle("Contrast Stretch Values Input");
 		
-		Pane chart = new Pane();
+		NumberAxis xAxis = new NumberAxis("Input", 0, 255, 25);
+		NumberAxis yAxis = new NumberAxis("Output", 0, 255, 25);
 		
-		Circle point1 = new Circle
-		Scene contrastInputScene = new Scene(chart, 300, 300);
+		LineChart contrastInputChart =  new LineChart(xAxis, yAxis);
+		
+		XYChart.Series<Integer, Integer> inputPoints = new XYChart.Series<>();
+		inputPoints.getData().add(new XYChart.Data<Integer, Integer>(r1, s1));
+		inputPoints.getData().add(new XYChart.Data<Integer, Integer>(r2, s2));
+		
+		contrastInputChart.getData().add(inputPoints);
+		contrastInputChart.setAnimated(false);
+		
+		contrastInputChart.setOnMouseClicked(new EventHandler<MouseEvent>()
+		{
+		    @Override
+		    public void handle(MouseEvent m)
+		    {
+		        if(m.getEventType() == MouseEvent.MOUSE_CLICKED)
+		        {
+		            Number newX = xAxis.getValueForDisplay(m.getX());
+		            Number newY = yAxis.getValueForDisplay(m.getY());
+		            
+		            inputPoints.getData().get(0).setXValue(newX.intValue());
+		            inputPoints.getData().get(0).setYValue(newY.intValue());
+		        }
+		    }
+		});
+		
+		Scene contrastInputScene = new Scene(contrastInputChart, 300, 300);
 		contrastInput.setScene(contrastInputScene);
 		contrastInput.show();
 	}
