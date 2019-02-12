@@ -20,6 +20,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
@@ -29,6 +30,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Photoshop extends Application
@@ -40,9 +42,9 @@ public class Photoshop extends Application
 	private double gammaValue;
 	
 	private int r1 = 50;
-	private int s1 = 20;
+	private int s1 = 100;
 	private int r2 = 200;
-	private int s2 = 230;
+	private int s2 = 150;
 
 	public Photoshop()
 	{
@@ -69,6 +71,7 @@ public class Photoshop extends Application
 		Button cc_button = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
 		Button saveGammaButton = new Button("Save Gamma Value");
+		Button setContrastValueBtn = new Button("Set contrast values");
 		Label gammaInputLabel = new Label("Gamma value:");
 		TextField gammaInput = new TextField();
 
@@ -117,6 +120,15 @@ public class Photoshop extends Application
 				
 				Image stretchedImage = contrastStretcher(image);
 				imageView.setImage(stretchedImage);
+			}
+		});
+		
+		setContrastValueBtn.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				makeContrastInputWindow();
 			}
 		});
 
@@ -171,8 +183,9 @@ public class Photoshop extends Application
 		topElements.setHgap(5);
 
 		// Add all the buttons and the image for the GUI
-		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button, histogram_button, cc_button,
-				resetButton, gammaInputLabel, gammaInput, saveGammaButton);
+		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
+				setContrastValueBtn, histogram_button, cc_button, resetButton, 
+				gammaInputLabel, gammaInput, saveGammaButton);
 
 		root.setTop(topElements);
 		root.setCenter(imageView);
@@ -343,6 +356,21 @@ public class Photoshop extends Application
 			int correctedColour = (int) (multiplier * (colour - r2) + s2);
 			return correctedColour;
 		}
+	}
+	
+	public void makeContrastInputWindow()
+	{
+		Stage contrastInput = new Stage();
+		contrastInput.setHeight(300);
+		contrastInput.setWidth(300);
+		contrastInput.setTitle("Contrast Stretch Values Input");
+		
+		Pane chart = new Pane();
+		
+		Circle point1 = new Circle
+		Scene contrastInputScene = new Scene(chart, 300, 300);
+		contrastInput.setScene(contrastInputScene);
+		contrastInput.show();
 	}
 	
 	public static void main(String[] args)
