@@ -40,10 +40,12 @@ import javafx.stage.Stage;
 
 public class Photoshop extends Application
 {
-	private static final int BYTE_LIMIT = 256;
+	private static final int BYTE_LIMIT = 255;
 
 	private int[] gammaLookupTable;
 
+	private int[] contrastLookupTable;
+	        
 	private double gammaValue;
 	
 	private int r1;
@@ -54,8 +56,11 @@ public class Photoshop extends Application
 	public Photoshop()
 	{
 		gammaValue = 1.0;
+		gammaLookupTable = new int[BYTE_LIMIT+1];
 		computeGammaLookUpTable();
 		
+		contrastLookupTable = new int[BYTE_LIMIT+1];
+		computeContrastLookUpTable();
 		r1 = 40;
 		s1 = 40;
 		r2 = 215;
@@ -68,7 +73,7 @@ public class Photoshop extends Application
 		stage.setTitle("Photoshop");
 
 		// Read the image
-		Image image = new Image(new FileInputStream("raytrace.jpg"));
+		Image image = new Image(new FileInputStream("angus.jpg"));
 
 		// Create the graphical view of the image
 		ImageView imageView = new ImageView(image);
@@ -128,8 +133,10 @@ public class Photoshop extends Application
 			{
 				System.out.println("Contrast Stretching");
 				
+				long start = System.currentTimeMillis();
 				Image stretchedImage = contrastStretcher(image);
 				imageView.setImage(stretchedImage);
+				System.out.println(System.currentTimeMillis() - start);
 			}
 		});
 		
@@ -244,17 +251,16 @@ public class Photoshop extends Application
 
 	private void computeGammaLookUpTable()
 	{
-		gammaLookupTable = new int[BYTE_LIMIT];
-		for (int i = 0; i < BYTE_LIMIT; i++)
+		for (int i = 0; i <= BYTE_LIMIT; i++)
 		{
-			int correctedValue = (int) (255 * Math.pow(i / 255.0, 1.0 / gammaValue));
+			int correctedValue = (int) (BYTE_LIMIT * Math.pow(i / 255.0, 1.0 / gammaValue));
 			gammaLookupTable[i] = correctedValue;
 		}
 	}
 
 	private int getCorrectedValue(double colour)
 	{
-		int integerColour = (int) (colour * 255);
+		int integerColour = (int) (colour * BYTE_LIMIT);
 		return gammaLookupTable[integerColour];
 	}
 
@@ -347,26 +353,34 @@ public class Photoshop extends Application
 
 	public int getContrastStretchedValue(double colourValue)
 	{
-		int colour = (int) (colourValue * (BYTE_LIMIT - 1));
-		if(colour < r1)
-		{
-			int correctedColour = (int) (((double)s1)/r1 * colour);
-			return correctedColour;
-		}
-		else if(r1 <= colour && colour <= r2)
-		{
-			double multiplier = ((double)(s2 - s1))/(r2 - r1);
-			int correctedColour = (int) (multiplier * (colour - r1) + s1);
-			return correctedColour;
-		}
-		else
-		{
-			double multiplier = ((double)(BYTE_LIMIT - 1 - s2)) / 
-					(BYTE_LIMIT - 1 - r2);
-			int correctedColour = (int) (multiplier * (colour - r2) + s2);
-			return correctedColour;
-		}
+		int colour = (int)(colourValue * BYTE_LIMIT);
+		return contrastLookupTable[colour]; 
 	}
+	
+	private void computeContrastLookUpTable()
+    {
+        for (int colour = 0; colour <= BYTE_LIMIT; colour++)
+        {
+            int correctedColour;
+            if(colour < r1)
+            {
+                correctedColour = (int)(((double)s1)/r1 * colour);
+            }
+            else if(r1 <= colour && colour <= r2)
+            {
+                double multiplier = ((double)(s2 - s1))/(r2 - r1);
+                correctedColour = (int) (multiplier * (colour - r1) + s1);
+            }
+            else
+            {
+                double multiplier = ((double)(BYTE_LIMIT - s2)) / 
+                        (BYTE_LIMIT - r2);
+                correctedColour = (int) (multiplier * (colour - r2) + s2);
+            }
+            
+            contrastLookupTable[colour]  = correctedColour;
+        }
+    }
 	
 	public void makeContrastInputWindow()
 	{
@@ -378,7 +392,7 @@ public class Photoshop extends Application
 		NumberAxis xAxis = new NumberAxis("Input", 0, 255, 25);
 		NumberAxis yAxis = new NumberAxis("Output", 0, 255, 25);
 		
-		LineChart contrastInputChart =  new LineChart(xAxis, yAxis);
+		LineChart contrastInputChart = new LineChart(xAxis, yAxis);
 		
 		XYChart.Series<Integer, Integer> inputPoints = new XYChart.Series<>();
 		
@@ -409,6 +423,8 @@ public class Photoshop extends Application
                 
                 r1 = newX.intValue();
                 s1 = newY.intValue();
+                
+                computeContrastLookUpTable();
 		    }
 		});
 		
@@ -425,6 +441,8 @@ public class Photoshop extends Application
                 
                 r2 = newX.intValue();
                 s2 = newY.intValue();
+                
+                computeContrastLookUpTable();
             }
         });
 		
