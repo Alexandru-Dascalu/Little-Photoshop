@@ -22,6 +22,7 @@ import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.control.Label;
@@ -365,8 +366,8 @@ public class Photoshop extends Application
 	public void makeContrastInputWindow()
 	{
 		Stage contrastInput = new Stage();
-		contrastInput.setHeight(300);
-		contrastInput.setWidth(300);
+		contrastInput.setHeight(800);
+		contrastInput.setWidth(800);
 		contrastInput.setTitle("Contrast Stretch Values Input");
 		
 		NumberAxis xAxis = new NumberAxis("Input", 0, 255, 25);
@@ -375,29 +376,45 @@ public class Photoshop extends Application
 		LineChart contrastInputChart =  new LineChart(xAxis, yAxis);
 		
 		XYChart.Series<Integer, Integer> inputPoints = new XYChart.Series<>();
-		inputPoints.getData().add(new XYChart.Data<Integer, Integer>(r1, s1));
-		inputPoints.getData().add(new XYChart.Data<Integer, Integer>(r2, s2));
+		
+		XYChart.Data<Integer, Integer> point1 = new XYChart.Data<Integer, Integer>(r1, s1);
+		XYChart.Data<Integer, Integer> point2 = new XYChart.Data<Integer, Integer>(r2, s2);
+		
+		inputPoints.getData().add(point1);
+		inputPoints.getData().add(point2);
 		
 		contrastInputChart.getData().add(inputPoints);
 		contrastInputChart.setAnimated(false);
+		contrastInputChart.setLegendVisible(false);
 		
-		contrastInputChart.setOnMouseClicked(new EventHandler<MouseEvent>()
+		point1.getNode().setOnMouseDragged(new EventHandler<MouseEvent>()
 		{
 		    @Override
 		    public void handle(MouseEvent m)
 		    {
-		        if(m.getEventType() == MouseEvent.MOUSE_CLICKED)
-		        {
-		            Number newX = xAxis.getValueForDisplay(m.getX());
-		            Number newY = yAxis.getValueForDisplay(m.getY());
-		            
-		            inputPoints.getData().get(0).setXValue(newX.intValue());
-		            inputPoints.getData().get(0).setYValue(newY.intValue());
-		        }
+		        Number newX = xAxis.getValueForDisplay(m.getSceneX() - 60);
+                Number newY = yAxis.getValueForDisplay(m.getSceneY() - 8);
+                
+                point1.setXValue(newX.intValue());
+                point1.setYValue(newY.intValue());
+		       
 		    }
 		});
 		
-		Scene contrastInputScene = new Scene(contrastInputChart, 300, 300);
+		point2.getNode().setOnMouseDragged(new EventHandler<MouseEvent>()
+        {
+            @Override
+            public void handle(MouseEvent m)
+            {
+                Number newX = xAxis.getValueForDisplay(m.getSceneX() - 60);
+                Number newY = yAxis.getValueForDisplay(m.getSceneY() - 8);
+                
+                point2.setXValue(newX.intValue());
+                point2.setYValue(newY.intValue());
+            }
+        });
+		
+		Scene contrastInputScene = new Scene(contrastInputChart, 800, 800);
 		contrastInput.setScene(contrastInputScene);
 		contrastInput.show();
 	}
