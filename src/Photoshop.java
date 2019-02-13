@@ -25,6 +25,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
@@ -73,7 +74,7 @@ public class Photoshop extends Application
 		stage.setTitle("Photoshop");
 
 		// Read the image
-		Image image = new Image(new FileInputStream("angus.jpg"));
+		Image image = new Image(new FileInputStream("raytrace.jpg"));
 
 		// Create the graphical view of the image
 		ImageView imageView = new ImageView(image);
@@ -85,10 +86,10 @@ public class Photoshop extends Application
 		Button histogram_button = new Button("Histograms");
 		Button cc_button = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
-		Button saveGammaButton = new Button("Save Gamma Value");
 		Button setContrastValueBtn = new Button("Set contrast values");
 		Label gammaInputLabel = new Label("Gamma value:");
 		TextField gammaInput = new TextField();
+		gammaInput.setText("1");
 
 		// Add all the event handlers (this is a minimal GUI - you may try to do
 		// better)
@@ -119,8 +120,10 @@ public class Photoshop extends Application
 
 				long start = System.currentTimeMillis();
 				Image correctedImage = gammaCorrecter(image);
-				// Image correctedImage = gammaCorrecter(image,
-				// Double.parseDouble(gammaInput.getText()));
+				
+				gammaValue = Double.parseDouble(gammaInput.getText());
+				computeGammaLookUpTable();
+				
 				imageView.setImage(correctedImage);
 				System.out.println(System.currentTimeMillis() - start);
 			}
@@ -176,20 +179,6 @@ public class Photoshop extends Application
 			}
 		});
 
-		saveGammaButton.setOnAction(new EventHandler<ActionEvent>()
-		{
-			@Override
-			public void handle(ActionEvent event)
-			{
-				String gammaText = gammaInput.getText();
-				if (!gammaText.equals(""))
-				{
-					gammaValue = Double.parseDouble(gammaInput.getText());
-					computeGammaLookUpTable();
-				}
-			}
-		});
-
 		// Using a flow pane
 		BorderPane root = new BorderPane();
 
@@ -201,11 +190,14 @@ public class Photoshop extends Application
 
 		// Add all the buttons and the image for the GUI
 		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
-				setContrastValueBtn, histogram_button, cc_button, resetButton, 
-				gammaInputLabel, gammaInput, saveGammaButton);
+				histogram_button, cc_button, resetButton);
 
+		VBox inputs = new VBox();
+		inputs.getChildren().addAll(gammaInputLabel, gammaInput, setContrastValueBtn);
+		
 		root.setTop(topElements);
 		root.setCenter(imageView);
+		root.setRight(inputs);
 
 		// Display to user
 		Scene scene = new Scene(root, 1024, 768);
