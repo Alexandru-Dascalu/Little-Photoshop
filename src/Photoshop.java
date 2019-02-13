@@ -46,15 +46,20 @@ public class Photoshop extends Application
 
 	private double gammaValue;
 	
-	private int r1 = 50;
-	private int s1 = 100;
-	private int r2 = 200;
-	private int s2 = 150;
+	private int r1;
+	private int s1;
+	private int r2;
+	private int s2;
 
 	public Photoshop()
 	{
 		gammaValue = 1.0;
 		computeGammaLookUpTable();
+		
+		r1 = 40;
+		s1 = 40;
+		r2 = 215;
+		s2 = 215;
 	}
 
 	@Override
@@ -377,11 +382,15 @@ public class Photoshop extends Application
 		
 		XYChart.Series<Integer, Integer> inputPoints = new XYChart.Series<>();
 		
+		XYChart.Data<Integer, Integer> originPoint = new XYChart.Data<Integer, Integer>(0, 0);
+		XYChart.Data<Integer, Integer> endPoint = new XYChart.Data<Integer, Integer>(255, 255);
 		XYChart.Data<Integer, Integer> point1 = new XYChart.Data<Integer, Integer>(r1, s1);
 		XYChart.Data<Integer, Integer> point2 = new XYChart.Data<Integer, Integer>(r2, s2);
 		
+		inputPoints.getData().add(originPoint);
 		inputPoints.getData().add(point1);
 		inputPoints.getData().add(point2);
+		inputPoints.getData().add(endPoint);
 		
 		contrastInputChart.getData().add(inputPoints);
 		contrastInputChart.setAnimated(false);
@@ -397,7 +406,9 @@ public class Photoshop extends Application
                 
                 point1.setXValue(newX.intValue());
                 point1.setYValue(newY.intValue());
-		       
+                
+                r1 = newX.intValue();
+                s1 = newY.intValue();
 		    }
 		});
 		
@@ -411,6 +422,9 @@ public class Photoshop extends Application
                 
                 point2.setXValue(newX.intValue());
                 point2.setYValue(newY.intValue());
+                
+                r2 = newX.intValue();
+                s2 = newY.intValue();
             }
         });
 		
