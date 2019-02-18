@@ -13,16 +13,17 @@ All of those functions must be written by yourself
 You may use libraries to achieve a better GUI
 */
 import java.io.FileInputStream;
+import javafx.scene.chart.XYChart;
 import java.io.FileNotFoundException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.chart.Axis;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.layout.Border;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
@@ -36,7 +37,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Photoshop extends Application
@@ -83,7 +83,7 @@ public class Photoshop extends Application
 		Button invert_button = new Button("Invert");
 		Button gamma_button = new Button("Gamma Correct");
 		Button contrast_button = new Button("Contrast Stretching");
-		Button histogram_button = new Button("Histograms");
+		Button histogramButton = new Button("Histograms");
 		Button cc_button = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
 		Button setContrastValueBtn = new Button("Set contrast values");
@@ -152,12 +152,12 @@ public class Photoshop extends Application
 			}
 		});
 
-		histogram_button.setOnAction(new EventHandler<ActionEvent>()
+		histogramButton.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent event)
 			{
-				System.out.println("Histogram");
+				showHistograms(image);
 			}
 		});
 
@@ -190,7 +190,7 @@ public class Photoshop extends Application
 
 		// Add all the buttons and the image for the GUI
 		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
-				histogram_button, cc_button, resetButton);
+				histogramButton, cc_button, resetButton);
 
 		VBox inputs = new VBox();
 		inputs.getChildren().addAll(gammaInputLabel, gammaInput, setContrastValueBtn);
@@ -441,6 +441,98 @@ public class Photoshop extends Application
 		Scene contrastInputScene = new Scene(contrastInputChart, 800, 800);
 		contrastInput.setScene(contrastInputScene);
 		contrastInput.show();
+	}
+	
+	public int[][] getHistogram(Image image)
+	{
+        // Find the width and height of the image to be process
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        
+        // Get an interface to read from the original image passed as the
+        // parameter to the function
+        PixelReader image_reader = image.getPixelReader();
+        
+        int[][] histogram = new int[BYTE_LIMIT+1][3];
+        
+        for(int i=0; i<BYTE_LIMIT+1; i++)
+        {
+            for(int j=0; j<3; j++)
+            {
+                histogram[i][j] = 0;
+            }
+        }
+        
+        for(int y=0; y<height; y++)
+        {
+            for(int x=0; x<width; x++)
+            {
+                Color color = image_reader.getColor(x, y);
+                
+                int red = (int)(color.getRed()*BYTE_LIMIT);
+                histogram[red][0]++;
+                
+                int green = (int)(color.getGreen()*BYTE_LIMIT);
+                histogram[green][1]++;
+                
+                int blue = (int)(color.getBlue()*BYTE_LIMIT);
+                histogram[blue][2]++;
+            }
+        }
+        
+        return histogram;
+	}
+	
+	public int getMaxFromHistogram(int[] histogram)
+	{
+	    int max=0;
+	    for(int i=0; i<histogram.length; i++)
+	    {
+	        if(max < histogram[i])
+	        {
+	            max = histogram[i];
+	        }
+	    }
+	    
+	    return max;
+	}
+	
+	public void showHistograms(Image image)
+	{
+	    Stage histogramWindow = new Stage();
+	    histogramWindow.setWidth(700);
+	    histogramWindow.setHeight(700);
+	    histogramWindow.setTitle("Histogram View");
+	    
+	    int[][] histogram = getHistogram(image);
+	    int maxValue = getMaxFromHistogram(histogram[0]);
+	    
+	    CategoryAxis xAxis = new CategoryAxis();
+	    xAxis.setLabel("Intensity Levels");
+	    
+	    for(int i=0; i<BYTE_LIMIT+1; i++)
+	    {
+	        xAxis.getCategories().add(""+i);
+	    }
+	    
+        ValueAxis<Number> yAxis = new NumberAxis("Number of pixels", 0, maxValue, 25);
+        
+        BarChart<String, Number> histogramChart = new BarChart<>(xAxis, yAxis);
+        
+        XYChart.Series<String, Number> intensityLevelCount = new XYChart.Series<>();
+       
+        for(int i=0; i<BYTE_LIMIT+1; i++)
+        {
+            XYChart.Data<String, Number> intensityCount = new XYChart.Data<String, Number>(i+"", histogram[i][0]);
+            intensityLevelCount.getData().add(intensityCount);
+        }
+        
+        histogramChart.getData().add(intensityLevelCount);
+        histogramChart.setLegendVisible(false);
+        
+        Scene histogramView = new Scene(histogramChart, 700, 700);
+        histogramWindow.setScene(histogramView);
+        histogramWindow.show();
 	}
 	
 	public static void main(String[] args)
