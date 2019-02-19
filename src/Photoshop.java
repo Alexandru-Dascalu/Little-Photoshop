@@ -384,7 +384,7 @@ public class Photoshop extends Application
 		NumberAxis xAxis = new NumberAxis("Input", 0, 255, 25);
 		NumberAxis yAxis = new NumberAxis("Output", 0, 255, 25);
 		
-		LineChart contrastInputChart = new LineChart(xAxis, yAxis);
+		LineChart<Number, Number> contrastInputChart = new LineChart<>(xAxis, yAxis);
 		
 		XYChart.Series<Integer, Integer> inputPoints = new XYChart.Series<>();
 		
