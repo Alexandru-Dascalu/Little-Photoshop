@@ -453,11 +453,11 @@ public class Photoshop extends Application
         // parameter to the function
         PixelReader image_reader = image.getPixelReader();
         
-        int[][] histogram = new int[BYTE_LIMIT+1][3];
+        int[][] histogram = new int[BYTE_LIMIT+1][4];
         
         for(int i=0; i<BYTE_LIMIT+1; i++)
         {
-            for(int j=0; j<3; j++)
+            for(int j=0; j<4; j++)
             {
                 histogram[i][j] = 0;
             }
@@ -477,6 +477,9 @@ public class Photoshop extends Application
                 
                 int blue = (int)(color.getBlue()*BYTE_LIMIT);
                 histogram[blue][2]++;
+                
+                int brightness = (red + blue + green)/3;
+                histogram[brightness][3]++;
             }
         }
         
@@ -497,6 +500,50 @@ public class Photoshop extends Application
 	    return max;
 	}
 	
+	public XYChart.Series<Number, Number> getHistogramSeries(int[][] histogram, Color color)
+	{
+	    XYChart.Series<Number, Number> intensityLevelCount = new XYChart.Series<>();
+	    
+	    if(color.equals(Color.RED))
+	    {
+	        for(int i=0; i<BYTE_LIMIT+1; i++)
+	        {
+	            XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][0]);
+	            intensityLevelCount.getData().add(intensityCount);
+	        }
+	    }
+	    else if(color.equals(Color.GREEN))
+	    {
+	        for(int i=0; i<BYTE_LIMIT+1; i++)
+            {
+                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][1]);
+                intensityLevelCount.getData().add(intensityCount);
+            }
+	    }
+	    else if(color.equals(Color.BLUE))
+        {
+            for(int i=0; i<BYTE_LIMIT+1; i++)
+            {
+                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][2]);
+                intensityLevelCount.getData().add(intensityCount);
+            }
+        }
+	    else if(color.equals(Color.GREY))
+        {
+            for(int i=0; i<BYTE_LIMIT+1; i++)
+            {
+                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][3]);
+                intensityLevelCount.getData().add(intensityCount);
+            }
+        }
+	    else
+	    {
+	        throw new IllegalArgumentException();
+	    }
+	    
+	    return intensityLevelCount;
+	}
+	
 	public void showHistograms(Image image)
 	{
 	    Stage histogramWindow = new Stage();
@@ -512,15 +559,14 @@ public class Photoshop extends Application
         
         AreaChart<Number, Number> histogramChart = new AreaChart<>(xAxis, yAxis);
         
-        XYChart.Series<Number, Number> intensityLevelCount = new XYChart.Series<>();
-       
-        for(int i=0; i<BYTE_LIMIT+1; i++)
-        {
-            XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][0]);
-            intensityLevelCount.getData().add(intensityCount);
-        }
+        XYChart.Series<Number, Number> redLevelCount = getHistogramSeries(histogram, Color.RED);
+        XYChart.Series<Number, Number> greenLevelCount = getHistogramSeries(histogram, Color.GREEN);
+        XYChart.Series<Number, Number> blueLevelCount = getHistogramSeries(histogram, Color.BLUE);
+        XYChart.Series<Number, Number> brightnessLevelCount = getHistogramSeries(histogram, Color.GREY);
         
-        histogramChart.getData().add(intensityLevelCount);
+        histogramChart.getData().addAll(redLevelCount, new XYChart.Series<Number, Number>(), 
+            greenLevelCount, blueLevelCount, new XYChart.Series<>(),  brightnessLevelCount);
+        
         histogramChart.setLegendVisible(false);
         histogramChart.setCreateSymbols(false);
         
