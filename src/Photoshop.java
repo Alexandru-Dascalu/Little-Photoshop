@@ -545,8 +545,8 @@ public class Photoshop extends Application
 	public void showHistograms(Image image)
 	{
 	    Stage histogramWindow = new Stage();
-	    histogramWindow.setWidth(700);
-	    histogramWindow.setHeight(700);
+	    histogramWindow.setWidth(1500);
+	    histogramWindow.setHeight(1000);
 	    histogramWindow.setTitle("Histogram View");
 	    
 	    int[][] histogram = getHistogram(image);
@@ -558,14 +558,17 @@ public class Photoshop extends Application
         AreaChart<Number, Number> histogramChart = new AreaChart<>(xAxis, yAxis);
         
         XYChart.Series<Number, Number> redLevelCount = getHistogramSeries(histogram, Color.RED);
+        redLevelCount.setName("Red Channel");
         XYChart.Series<Number, Number> greenLevelCount = getHistogramSeries(histogram, Color.GREEN);
+        greenLevelCount.setName("Green Channel");
         XYChart.Series<Number, Number> blueLevelCount = getHistogramSeries(histogram, Color.BLUE);
+        blueLevelCount.setName("Blue Channel");
         XYChart.Series<Number, Number> brightnessLevelCount = getHistogramSeries(histogram, Color.GREY);
+        brightnessLevelCount.setName("Brightness");
         
-        histogramChart.getData().addAll(redLevelCount, new XYChart.Series<Number, Number>(), 
-            greenLevelCount, blueLevelCount, new XYChart.Series<>(),  brightnessLevelCount);
+        histogramChart.getData().addAll(redLevelCount, brightnessLevelCount, 
+            greenLevelCount, blueLevelCount);
         
-        histogramChart.setLegendVisible(false);
         histogramChart.setCreateSymbols(false);
         histogramChart.setAnimated(false);
         
@@ -610,11 +613,11 @@ public class Photoshop extends Application
         rgbButton.setOnAction(e -> 
         {
             histogramChart.getData().clear();
-            histogramChart.getData().addAll(redLevelCount, new XYChart.Series<Number, Number>(), 
+            histogramChart.getData().addAll(redLevelCount, new XYChart.Series<>(), 
                 greenLevelCount, blueLevelCount, new XYChart.Series<>(),  brightnessLevelCount);
         });
         
-        Scene histogramView = new Scene(histogramPane, 700, 700);
+        Scene histogramView = new Scene(histogramPane, 1920, 1080);
         histogramWindow.setScene(histogramView);
         histogramWindow.show();
 	}
@@ -623,5 +626,4 @@ public class Photoshop extends Application
 	{
 		launch();
 	}
-
 }
