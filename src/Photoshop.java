@@ -386,12 +386,12 @@ public class Photoshop extends Application
 		
 		LineChart<Number, Number> contrastInputChart = new LineChart<>(xAxis, yAxis);
 		
-		XYChart.Series<Integer, Integer> inputPoints = new XYChart.Series<>();
+		XYChart.Series<Number, Number> inputPoints = new XYChart.Series<>();
 		
-		XYChart.Data<Integer, Integer> originPoint = new XYChart.Data<Integer, Integer>(0, 0);
-		XYChart.Data<Integer, Integer> endPoint = new XYChart.Data<Integer, Integer>(255, 255);
-		XYChart.Data<Integer, Integer> point1 = new XYChart.Data<Integer, Integer>(r1, s1);
-		XYChart.Data<Integer, Integer> point2 = new XYChart.Data<Integer, Integer>(r2, s2);
+		XYChart.Data<Number, Number> originPoint = new XYChart.Data<>(0, 0);
+		XYChart.Data<Number, Number> endPoint = new XYChart.Data<>(255, 255);
+		XYChart.Data<Number, Number> point1 = new XYChart.Data<>(r1, s1);
+		XYChart.Data<Number, Number> point2 = new XYChart.Data<>(r2, s2);
 		
 		inputPoints.getData().add(originPoint);
 		inputPoints.getData().add(point1);
