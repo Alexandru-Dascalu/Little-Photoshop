@@ -18,7 +18,6 @@ import java.io.FileNotFoundException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
@@ -26,7 +25,6 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
@@ -192,7 +190,7 @@ public class Photoshop extends Application
 		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
 				histogramButton, cc_button, resetButton);
 
-		VBox inputs = new VBox();
+		VBox inputs = new VBox(5);
 		inputs.getChildren().addAll(gammaInputLabel, gammaInput, setContrastValueBtn);
 		
 		root.setTop(topElements);
@@ -569,8 +567,54 @@ public class Photoshop extends Application
         
         histogramChart.setLegendVisible(false);
         histogramChart.setCreateSymbols(false);
+        histogramChart.setAnimated(false);
         
-        Scene histogramView = new Scene(histogramChart, 700, 700);
+        BorderPane histogramPane = new BorderPane();
+        histogramPane.setCenter(histogramChart);
+        
+        VBox colourButtons = new VBox(5);
+        Button redButton = new Button("Red Histogram");
+        Button greenButton = new Button("Green Histogram");
+        Button blueButton = new Button("Blue Histogram");
+        Button brightnessButton = new Button("Brightness Histogram");
+        Button rgbButton = new Button("RGB histogram");
+        
+        colourButtons.getChildren().addAll(redButton, greenButton, blueButton, 
+            brightnessButton, rgbButton);
+        histogramPane.setRight(colourButtons);
+        
+        redButton.setOnAction(e -> 
+        {
+            histogramChart.getData().clear();
+            histogramChart.getData().add(redLevelCount);
+        });
+        
+        greenButton.setOnAction(e -> 
+        {
+            histogramChart.getData().clear();
+            histogramChart.getData().add(greenLevelCount);
+        });
+        
+        blueButton.setOnAction(e -> 
+        {
+            histogramChart.getData().clear();
+            histogramChart.getData().add(blueLevelCount);
+        });
+        
+        brightnessButton.setOnAction(e -> 
+        {
+            histogramChart.getData().clear();
+            histogramChart.getData().add(brightnessLevelCount);
+        });
+        
+        rgbButton.setOnAction(e -> 
+        {
+            histogramChart.getData().clear();
+            histogramChart.getData().addAll(redLevelCount, new XYChart.Series<Number, Number>(), 
+                greenLevelCount, blueLevelCount, new XYChart.Series<>(),  brightnessLevelCount);
+        });
+        
+        Scene histogramView = new Scene(histogramPane, 700, 700);
         histogramWindow.setScene(histogramView);
         histogramWindow.show();
 	}
