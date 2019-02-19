@@ -18,14 +18,16 @@ import java.io.FileNotFoundException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -182,12 +184,10 @@ public class Photoshop extends Application
 		// Using a flow pane
 		BorderPane root = new BorderPane();
 
-		FlowPane topElements = new FlowPane();
-
+		HBox topElements = new HBox(5);
+		topElements.setAlignment(Pos.CENTER);
 		// Gaps between buttons
-		topElements.setVgap(10);
-		topElements.setHgap(5);
-
+		
 		// Add all the buttons and the image for the GUI
 		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
 				histogramButton, cc_button, resetButton);
@@ -507,28 +507,22 @@ public class Photoshop extends Application
 	    int[][] histogram = getHistogram(image);
 	    int maxValue = getMaxFromHistogram(histogram[0]);
 	    
-	    CategoryAxis xAxis = new CategoryAxis();
-	    xAxis.setLabel("Intensity Levels");
-	    
-	    for(int i=0; i<BYTE_LIMIT+1; i++)
-	    {
-	        xAxis.getCategories().add(""+i);
-	    }
-	    
+	    ValueAxis<Number> xAxis = new NumberAxis("Intensity Levels", 0, BYTE_LIMIT,25);
         ValueAxis<Number> yAxis = new NumberAxis("Number of pixels", 0, maxValue, 25);
         
-        BarChart<String, Number> histogramChart = new BarChart<>(xAxis, yAxis);
+        AreaChart<Number, Number> histogramChart = new AreaChart<>(xAxis, yAxis);
         
-        XYChart.Series<String, Number> intensityLevelCount = new XYChart.Series<>();
+        XYChart.Series<Number, Number> intensityLevelCount = new XYChart.Series<>();
        
         for(int i=0; i<BYTE_LIMIT+1; i++)
         {
-            XYChart.Data<String, Number> intensityCount = new XYChart.Data<String, Number>(i+"", histogram[i][0]);
+            XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][0]);
             intensityLevelCount.getData().add(intensityCount);
         }
         
         histogramChart.getData().add(intensityLevelCount);
         histogramChart.setLegendVisible(false);
+        histogramChart.setCreateSymbols(false);
         
         Scene histogramView = new Scene(histogramChart, 700, 700);
         histogramWindow.setScene(histogramView);
