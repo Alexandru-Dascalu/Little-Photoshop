@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
@@ -28,6 +29,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -87,9 +89,7 @@ public class Photoshop extends Application
 		Button cc_button = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
 		Button setContrastValueBtn = new Button("Set contrast values");
-		Label gammaInputLabel = new Label("Gamma value:");
-		TextField gammaInput = new TextField();
-		gammaInput.setText("1");
+		
 
 		// Add all the event handlers (this is a minimal GUI - you may try to do
 		// better)
@@ -116,16 +116,7 @@ public class Photoshop extends Application
 			@Override
 			public void handle(ActionEvent event)
 			{
-				System.out.println("Gamma Correction");
-
-				long start = System.currentTimeMillis();
-				Image correctedImage = gammaCorrecter(image);
-				
-				gammaValue = Double.parseDouble(gammaInput.getText());
-				computeGammaLookUpTable();
-				
-				imageView.setImage(correctedImage);
-				System.out.println(System.currentTimeMillis() - start);
+			    showGammaInput(imageView, image);
 			}
 		});
 
@@ -191,7 +182,7 @@ public class Photoshop extends Application
 				histogramButton, cc_button, resetButton);
 
 		VBox inputs = new VBox(5);
-		inputs.getChildren().addAll(gammaInputLabel, gammaInput, setContrastValueBtn);
+		inputs.getChildren().addAll(setContrastValueBtn);
 		
 		root.setTop(topElements);
 		root.setCenter(imageView);
@@ -310,6 +301,48 @@ public class Photoshop extends Application
 		}
 
 		return correctedImage;
+	}
+	
+	public void showGammaInput(ImageView imageView, Image originalImage)
+	{
+	    Stage gammaWindow = new Stage();
+	    gammaWindow.setWidth(800);
+	    gammaWindow.setMaxWidth(1000);
+	    gammaWindow.setHeight(300);
+	    gammaWindow.setMaxHeight(300);
+	    gammaWindow.setTitle("Gamma Input");
+	    
+	    BorderPane allGammaInputs = new BorderPane();
+	    HBox manualGammaInput = new HBox(5);
+	    
+	    Label gammaInputLabel = new Label("If desired value is out of slider range, type it here:");
+        TextField gammaInput = new TextField();
+        gammaInput.setText("1");
+        
+        manualGammaInput.getChildren().addAll(gammaInputLabel, gammaInput);
+        manualGammaInput.setAlignment(Pos.CENTER);
+        
+        Slider gammaSlider = new Slider(0, 10, 1);
+        gammaSlider.setShowTickMarks(true);
+        gammaSlider.setShowTickLabels(true);
+        gammaSlider.setMajorTickUnit(0.5);
+        gammaSlider.setPrefHeight(2000);
+        gammaSlider.setPadding(new Insets(50, 50, 50, 50));
+        
+        gammaSlider.valueProperty().addListener((observable, oldValue, newValue) ->
+        {
+            gammaValue = newValue.doubleValue();
+            computeGammaLookUpTable();
+            imageView.setImage(gammaCorrecter(originalImage));
+        });
+        
+        allGammaInputs.setCenter(gammaSlider);
+        allGammaInputs.setTop(manualGammaInput);
+        allGammaInputs.setPadding(new Insets(30, 30, 30, 30));
+        
+        Scene gammaInputScene = new Scene(allGammaInputs, 1000, 300);
+        gammaWindow.setScene(gammaInputScene);
+        gammaWindow.show();
 	}
 	
 	public Image contrastStretcher(Image image)
