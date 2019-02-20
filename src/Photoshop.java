@@ -336,6 +336,20 @@ public class Photoshop extends Application
             imageView.setImage(gammaCorrecter(originalImage));
         });
         
+        gammaInput.textProperty().addListener((observable, oldValue, newValue) ->
+        {
+            try
+            {
+                gammaValue = Double.parseDouble(newValue);
+                computeGammaLookUpTable();
+                imageView.setImage(gammaCorrecter(originalImage));
+            }
+            catch(NumberFormatException e)
+            {
+                
+            }
+        });
+        
         allGammaInputs.setCenter(gammaSlider);
         allGammaInputs.setTop(manualGammaInput);
         allGammaInputs.setPadding(new Insets(30, 30, 30, 30));
