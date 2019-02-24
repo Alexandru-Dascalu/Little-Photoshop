@@ -148,7 +148,7 @@ public class Photoshop extends Application
 			@Override
 			public void handle(ActionEvent event)
 			{
-				showHistograms(image);
+				showHistograms(image, imageView);
 			}
 		});
 
@@ -498,11 +498,11 @@ public class Photoshop extends Application
         // parameter to the function
         PixelReader image_reader = image.getPixelReader();
         
-        int[][] histogram = new int[BYTE_LIMIT+1][4];
+        int[][] histogram = new int[5][BYTE_LIMIT+1];
         
-        for(int i=0; i<BYTE_LIMIT+1; i++)
+        for(int i=0; i < 5; i++)
         {
-            for(int j=0; j<4; j++)
+            for(int j=0; j < BYTE_LIMIT+1; j++)
             {
                 histogram[i][j] = 0;
             }
@@ -515,16 +515,19 @@ public class Photoshop extends Application
                 Color color = image_reader.getColor(x, y);
                 
                 int red = (int)(color.getRed()*BYTE_LIMIT);
-                histogram[red][0]++;
+                histogram[0][red]++;
                 
                 int green = (int)(color.getGreen()*BYTE_LIMIT);
-                histogram[green][1]++;
+                histogram[1][green]++;
                 
                 int blue = (int)(color.getBlue()*BYTE_LIMIT);
-                histogram[blue][2]++;
+                histogram[2][blue]++;
                 
                 int brightness = (red + blue + green)/3;
-                histogram[brightness][3]++;
+                histogram[3][brightness]++;
+                
+                int value = (int)(color.getBrightness()*BYTE_LIMIT);
+                histogram[4][value]++;
             }
         }
         
@@ -553,7 +556,7 @@ public class Photoshop extends Application
 	    {
 	        for(int i=0; i<BYTE_LIMIT+1; i++)
 	        {
-	            XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][0]);
+	            XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[0][i]);
 	            intensityLevelCount.getData().add(intensityCount);
 	        }
 	    }
@@ -561,7 +564,7 @@ public class Photoshop extends Application
 	    {
 	        for(int i=0; i<BYTE_LIMIT+1; i++)
             {
-                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][1]);
+                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[1][i]);
                 intensityLevelCount.getData().add(intensityCount);
             }
 	    }
@@ -569,7 +572,7 @@ public class Photoshop extends Application
         {
             for(int i=0; i<BYTE_LIMIT+1; i++)
             {
-                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][2]);
+                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[2][i]);
                 intensityLevelCount.getData().add(intensityCount);
             }
         }
@@ -577,7 +580,7 @@ public class Photoshop extends Application
         {
             for(int i=0; i<BYTE_LIMIT+1; i++)
             {
-                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[i][3]);
+                XYChart.Data<Number, Number> intensityCount = new XYChart.Data<>(i, histogram[3][i]);
                 intensityLevelCount.getData().add(intensityCount);
             }
         }
@@ -589,14 +592,14 @@ public class Photoshop extends Application
 	    return intensityLevelCount;
 	}
 	
-	public void showHistograms(Image image)
+	public void showHistograms(Image originalImage, ImageView imageView)
 	{
 	    Stage histogramWindow = new Stage();
 	    histogramWindow.setWidth(1500);
 	    histogramWindow.setHeight(1000);
 	    histogramWindow.setTitle("Histogram View");
 	    
-	    int[][] histogram = getHistogram(image);
+	    int[][] histogram = getHistogram(originalImage);
 	    int maxValue = getMaxFromHistogram(histogram[0]);
 	    
 	    ValueAxis<Number> xAxis = new NumberAxis("Intensity Levels", 0, BYTE_LIMIT,25);
@@ -628,9 +631,10 @@ public class Photoshop extends Application
         Button blueButton = new Button("Blue Histogram");
         Button brightnessButton = new Button("Brightness Histogram");
         Button rgbButton = new Button("RGB histogram");
+        Button equalizationButton = new Button("Equalize histogram");
         
         colourButtons.getChildren().addAll(redButton, greenButton, blueButton, 
-            brightnessButton, rgbButton);
+            brightnessButton, rgbButton, equalizationButton);
         histogramPane.setRight(colourButtons);
         
         redButton.setOnAction(e -> 
@@ -664,9 +668,65 @@ public class Photoshop extends Application
                 greenLevelCount, blueLevelCount, new XYChart.Series<>(),  brightnessLevelCount);
         });
         
+        equalizationButton.setOnAction(e ->
+        {
+            int imageSize = (int) (originalImage.getWidth() * originalImage.getHeight());
+            int[] brightnessMapping = computeCumulativeDistribution(histogram[4], imageSize);
+            imageView.setImage(getEqualizedImage(originalImage, brightnessMapping));
+        });
+        
         Scene histogramView = new Scene(histogramPane, 1920, 1080);
         histogramWindow.setScene(histogramView);
         histogramWindow.show();
+	}
+	
+	private int[] computeCumulativeDistribution(int[] histogram, int imageSize)
+	{
+	    int[] brightnessMapping = new int[BYTE_LIMIT+1];
+	    
+	    double cumulativeSum = 0;
+	    
+	    for(int i=0; i <= BYTE_LIMIT; i++)
+	    {
+	        cumulativeSum += histogram[i];
+	        brightnessMapping[i] = (int)(BYTE_LIMIT * (cumulativeSum/imageSize));
+	    }
+	    
+	    return brightnessMapping;
+	}
+	
+	public Image getEqualizedImage(Image image, int[] brightnessMapping)
+	{
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        
+        // Create a new image of that width and height
+        WritableImage equalizedImage = new WritableImage(width, height);
+        
+        // Get an interface to write to that image memory
+        PixelWriter equalizedImageWriter = equalizedImage.getPixelWriter();
+        // Get an interface to read from the original image passed as the
+        // parameter to the function
+        PixelReader imageReader = image.getPixelReader();
+
+        // Iterate over all pixels
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+               Color currentColor = imageReader.getColor(x, y);
+               
+               double hue = currentColor.getHue();
+               double saturation = currentColor.getSaturation();
+               int oldValue = (int)(currentColor.getBrightness()*BYTE_LIMIT);
+               double newValue = brightnessMapping[oldValue]/255.0;
+               
+               Color newColor = Color.hsb(hue, saturation, newValue);
+               equalizedImageWriter.setColor(x, y, newColor);
+            }
+        }
+        
+        return equalizedImage;
 	}
 	
 	public static void main(String[] args)
