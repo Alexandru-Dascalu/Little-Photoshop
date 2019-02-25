@@ -664,8 +664,8 @@ public class Photoshop extends Application
         rgbButton.setOnAction(e -> 
         {
             histogramChart.getData().clear();
-            histogramChart.getData().addAll(redLevelCount, new XYChart.Series<>(), 
-                greenLevelCount, blueLevelCount, new XYChart.Series<>(),  brightnessLevelCount);
+            histogramChart.getData().addAll(redLevelCount, brightnessLevelCount, 
+                greenLevelCount, blueLevelCount);
         });
         
         equalizationButton.setOnAction(e ->
