@@ -148,7 +148,7 @@ public class Photoshop extends Application
 			@Override
 			public void handle(ActionEvent event)
 			{
-				showHistograms(image, imageView);
+				showHistograms(imageView);
 			}
 		});
 
@@ -592,16 +592,11 @@ public class Photoshop extends Application
 	    return intensityLevelCount;
 	}
 	
-	public void showHistograms(Image originalImage, ImageView imageView)
+	public AreaChart<Number, Number> getHistogramChart(int[][] histogram)
 	{
-	    Stage histogramWindow = new Stage();
-	    histogramWindow.setWidth(1500);
-	    histogramWindow.setHeight(1000);
-	    histogramWindow.setTitle("Histogram View");
 	    
-	    int[][] histogram = getHistogram(originalImage);
-	    int maxValue = getMaxFromHistogram(histogram[0]);
-	    
+        int maxValue = getMaxFromHistogram(histogram[0]);
+        
 	    ValueAxis<Number> xAxis = new NumberAxis("Intensity Levels", 0, BYTE_LIMIT,25);
         ValueAxis<Number> yAxis = new NumberAxis("Number of pixels", 0, maxValue, 25);
         
@@ -616,11 +611,28 @@ public class Photoshop extends Application
         XYChart.Series<Number, Number> brightnessLevelCount = getHistogramSeries(histogram, Color.GREY);
         brightnessLevelCount.setName("Brightness");
         
-        histogramChart.getData().addAll(redLevelCount, brightnessLevelCount, 
-            greenLevelCount, blueLevelCount);
-        
+        histogramChart.getData().addAll(redLevelCount, brightnessLevelCount, greenLevelCount, blueLevelCount);
         histogramChart.setCreateSymbols(false);
         histogramChart.setAnimated(false);
+        
+        return histogramChart;
+	}
+	
+	public void showHistograms(ImageView imageView)
+	{
+	    Image image = imageView.getImage();
+	    Stage histogramWindow = new Stage();
+	    histogramWindow.setWidth(1500);
+	    histogramWindow.setHeight(1000);
+	    histogramWindow.setTitle("Histogram View");
+	    
+	    int[][] histogram = getHistogram(image);
+	    AreaChart<Number, Number> histogramChart = getHistogramChart(histogram);
+	    
+        /*XYChart.Series<Number, Number> redLevelCount = histogramChart.getData().get(0);
+        XYChart.Series<Number, Number> greenLevelCount = histogramChart.getData().get(2);
+        XYChart.Series<Number, Number> blueLevelCount = histogramChart.getData().get(3);
+        XYChart.Series<Number, Number> brightnessLevelCount = histogramChart.getData().get(1);*/
         
         BorderPane histogramPane = new BorderPane();
         histogramPane.setCenter(histogramChart);
@@ -639,47 +651,83 @@ public class Photoshop extends Application
         
         redButton.setOnAction(e -> 
         {
-            histogramChart.getData().clear();
-            histogramChart.getData().add(redLevelCount);
-            histogramChart.setLegendVisible(false);
+            int[][] newHistogram = getHistogram(imageView.getImage());
+            AreaChart<Number, Number> newHistogramChart = (AreaChart<Number, Number>) histogramPane.getCenter();
+            XYChart.Series<Number, Number> redLevelCount = getHistogramSeries(newHistogram, Color.RED);
+            redLevelCount.setName("Red Channel");
+            
+            newHistogramChart.getData().clear();
+            newHistogramChart.getData().add(redLevelCount);
+            newHistogramChart.setLegendVisible(false);
         });
         
         greenButton.setOnAction(e -> 
         {
-            histogramChart.getData().clear();
-            histogramChart.getData().addAll(new XYChart.Series<>(), 
+            int[][] newHistogram = getHistogram(imageView.getImage());
+            AreaChart<Number, Number> newHistogramChart = (AreaChart<Number, Number>) histogramPane.getCenter();
+            XYChart.Series<Number, Number> greenLevelCount = getHistogramSeries(newHistogram, Color.GREEN);
+            greenLevelCount.setName("Green Channel");
+            
+            newHistogramChart.getData().clear();
+            newHistogramChart.getData().addAll(new XYChart.Series<>(), 
                 new XYChart.Series<>(), greenLevelCount);
-            histogramChart.setLegendVisible(false);
+            newHistogramChart.setLegendVisible(false);
         });
         
         blueButton.setOnAction(e -> 
         {
-            histogramChart.getData().clear();
-            histogramChart.getData().addAll(new XYChart.Series<>(), 
+            int[][] newHistogram = getHistogram(imageView.getImage());
+            AreaChart<Number, Number> newHistogramChart = (AreaChart<Number, Number>) histogramPane.getCenter();
+            XYChart.Series<Number, Number> blueLevelCount = getHistogramSeries(newHistogram, Color.BLUE);
+            blueLevelCount.setName("Blue Channel");
+            
+            newHistogramChart.getData().clear();
+            newHistogramChart.getData().addAll(new XYChart.Series<>(), 
                 new XYChart.Series<>(), new XYChart.Series<>(), blueLevelCount);
-            histogramChart.setLegendVisible(false);
+            newHistogramChart.setLegendVisible(false);
         });
         
         brightnessButton.setOnAction(e -> 
         {
-            histogramChart.getData().clear();
-            histogramChart.getData().addAll(new XYChart.Series<>(), brightnessLevelCount);
-            histogramChart.setLegendVisible(false);
+            int[][] newHistogram = getHistogram(imageView.getImage());
+            AreaChart<Number, Number> newHistogramChart = (AreaChart<Number, Number>) histogramPane.getCenter();
+            XYChart.Series<Number, Number> brightnessLevelCount = getHistogramSeries(newHistogram, Color.GREY);
+            brightnessLevelCount.setName("Brightness");
+            
+            newHistogramChart.getData().clear();
+            newHistogramChart.getData().addAll(new XYChart.Series<>(), brightnessLevelCount);
+            newHistogramChart.setLegendVisible(false);
         });
         
         rgbButton.setOnAction(e -> 
         {
-            histogramChart.getData().clear();
-            histogramChart.getData().addAll(redLevelCount, brightnessLevelCount, 
+            AreaChart<Number, Number> newHistogramChart = (AreaChart<Number, Number>) histogramPane.getCenter();
+            
+            int[][] newHistogram = getHistogram(imageView.getImage());
+            
+            XYChart.Series<Number, Number> redLevelCount = getHistogramSeries(newHistogram, Color.RED);
+            redLevelCount.setName("Red Channel");
+            XYChart.Series<Number, Number> greenLevelCount = getHistogramSeries(newHistogram, Color.GREEN);
+            greenLevelCount.setName("Green Channel");
+            XYChart.Series<Number, Number> blueLevelCount = getHistogramSeries(newHistogram, Color.BLUE);
+            blueLevelCount.setName("Blue Channel");
+            XYChart.Series<Number, Number> brightnessLevelCount = getHistogramSeries(newHistogram, Color.GREY);
+            brightnessLevelCount.setName("Brightness");
+            
+            newHistogramChart.getData().clear();
+            newHistogramChart.getData().addAll(redLevelCount, brightnessLevelCount, 
                 greenLevelCount, blueLevelCount);
-            histogramChart.setLegendVisible(true);
+            newHistogramChart.setLegendVisible(true);
         });
         
         equalizationButton.setOnAction(e ->
         {
-            int imageSize = (int) (originalImage.getWidth() * originalImage.getHeight());
+            int imageSize = (int) (image.getWidth() * image.getHeight());
             int[] brightnessMapping = computeCumulativeDistribution(histogram[4], imageSize);
-            imageView.setImage(getEqualizedImage(originalImage, brightnessMapping));
+            imageView.setImage(getEqualizedImage(image, brightnessMapping));
+            
+            int[][] newHistogram = getHistogram(imageView.getImage());
+            histogramPane.setCenter(getHistogramChart(newHistogram));
         });
         
         Scene histogramView = new Scene(histogramPane, 1920, 1080);
