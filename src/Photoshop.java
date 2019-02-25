@@ -641,24 +641,30 @@ public class Photoshop extends Application
         {
             histogramChart.getData().clear();
             histogramChart.getData().add(redLevelCount);
+            histogramChart.setLegendVisible(false);
         });
         
         greenButton.setOnAction(e -> 
         {
             histogramChart.getData().clear();
-            histogramChart.getData().add(greenLevelCount);
+            histogramChart.getData().addAll(new XYChart.Series<>(), 
+                new XYChart.Series<>(), greenLevelCount);
+            histogramChart.setLegendVisible(false);
         });
         
         blueButton.setOnAction(e -> 
         {
             histogramChart.getData().clear();
-            histogramChart.getData().add(blueLevelCount);
+            histogramChart.getData().addAll(new XYChart.Series<>(), 
+                new XYChart.Series<>(), new XYChart.Series<>(), blueLevelCount);
+            histogramChart.setLegendVisible(false);
         });
         
         brightnessButton.setOnAction(e -> 
         {
             histogramChart.getData().clear();
-            histogramChart.getData().add(brightnessLevelCount);
+            histogramChart.getData().addAll(new XYChart.Series<>(), brightnessLevelCount);
+            histogramChart.setLegendVisible(false);
         });
         
         rgbButton.setOnAction(e -> 
@@ -666,6 +672,7 @@ public class Photoshop extends Application
             histogramChart.getData().clear();
             histogramChart.getData().addAll(redLevelCount, brightnessLevelCount, 
                 greenLevelCount, blueLevelCount);
+            histogramChart.setLegendVisible(true);
         });
         
         equalizationButton.setOnAction(e ->
