@@ -15,6 +15,8 @@ You may use libraries to achieve a better GUI
 import java.io.FileInputStream;
 import javafx.scene.chart.XYChart;
 import java.io.FileNotFoundException;
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -80,7 +82,9 @@ public class Photoshop extends Application
 
 		// Create the graphical view of the image
 		ImageView imageView = new ImageView(image);
-
+		//imageView.setFitWidth(1000);
+		//imageView.setFitHeight(800);
+		
 		// Create the simple GUI
 		Button invert_button = new Button("Invert");
 		Button gamma_button = new Button("Gamma Correct");
@@ -681,6 +685,7 @@ public class Photoshop extends Application
             XYChart.Series<Number, Number> blueLevelCount = getHistogramSeries(newHistogram, Color.BLUE);
             blueLevelCount.setName("Blue Channel");
             
+            //histogram = getHistogram(imageView.getImage());
             newHistogramChart.getData().clear();
             newHistogramChart.getData().addAll(new XYChart.Series<>(), 
                 new XYChart.Series<>(), new XYChart.Series<>(), blueLevelCount);
@@ -704,6 +709,9 @@ public class Photoshop extends Application
             AreaChart<Number, Number> newHistogramChart = (AreaChart<Number, Number>) histogramPane.getCenter();
             
             int[][] newHistogram = getHistogram(imageView.getImage());
+            
+            //AtomicReference<Integer[][]> atomic = new AtomicReference<>();
+            //atomic.set(histogram);
             
             XYChart.Series<Number, Number> redLevelCount = getHistogramSeries(newHistogram, Color.RED);
             redLevelCount.setName("Red Channel");
