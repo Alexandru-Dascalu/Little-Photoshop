@@ -51,6 +51,7 @@ public class Photoshop extends Application
 
 	private int[] contrastLookupTable;
 	        
+	private static final int[][] laplacianFilter = {{-4,-1,0,-1,-4}, {-1,2,3,2,-1}, {0,3,4,3,0}, {-1,2,3,2,-1}, {-4,-1,0,-1,-4}};
 	private double gammaValue;
 	
 	private int r1;
@@ -162,6 +163,8 @@ public class Photoshop extends Application
 			public void handle(ActionEvent event)
 			{
 				System.out.println("Cross Correlation");
+				
+				imageView.setImage(getCrossCorelatedImage(image));
 			}
 		});
 
@@ -790,6 +793,111 @@ public class Photoshop extends Application
         }
         
         return equalizedImage;
+	}
+	
+	public Image getCrossCorelatedImage(Image image)
+	{
+	    int[][] pixelSums = new int[(int)image.getHeight()][(int)image.getWidth()];
+	    
+	    int max = 0;
+	    int min = Integer.MAX_VALUE;
+	    for(int y=0; y<image.getHeight(); y++)
+	    {
+	        for(int x=0; x<image.getWidth(); x++)
+	        {
+	            if(canFilterBeCentredOn(image, x, y))
+	            {
+	                pixelSums[y][x] = getPixelProductSum(image, x, y);
+	                
+	                if(pixelSums[y][x] > max)
+	                {
+	                    max = pixelSums[y][x];
+	                }
+	                
+	                if(pixelSums[y][x] < min)
+	                {
+	                    min = pixelSums[y][x];
+	                }
+	            }
+	            else
+	            {
+	                pixelSums[y][x] = BYTE_LIMIT;
+	            }
+	        }
+	    }
+	    
+	    int halfOfFilterSize = laplacianFilter.length/2;
+	    for(int y = halfOfFilterSize; y < image.getHeight() - halfOfFilterSize; y++)
+	    {
+	        for(int x = halfOfFilterSize; x < image.getWidth() - halfOfFilterSize; x++)
+	        {
+	            int normalisedValue = (pixelSums[y][x] - min)*BYTE_LIMIT/(max - min);
+	            pixelSums[y][x] = normalisedValue;
+	        }
+	    }
+	    
+	    
+	    return getGreyScaleImage(pixelSums);
+	}
+	
+	public Image getGreyScaleImage(int[][] pixelValues)
+	{
+	    // Create a new image of that width and height
+        WritableImage greyImage = new WritableImage(pixelValues[0].length, 
+            pixelValues.length);
+        
+        // Get an interface to write to that image memory
+        PixelWriter imageWriter = greyImage.getPixelWriter();
+        
+        for(int y = 0; y < pixelValues.length; y++)
+        {
+            for(int x = 0; x < pixelValues[0].length; x++)
+            {
+                Color newColor = Color.rgb(pixelValues[y][x], pixelValues[y][x],
+                    pixelValues[y][x]);
+                imageWriter.setColor(x, y, newColor);
+            }
+        }
+        
+        return greyImage;
+	}
+	
+	public int getPixelProductSum(Image image, int x, int y)
+	{
+	    int topLeftX = x - laplacianFilter.length/2;
+	    int topLeftY = y - laplacianFilter.length/2;
+	    PixelReader imageReader = image.getPixelReader();
+	    int sum = 0;
+	    
+	    for(int i = 0; i < laplacianFilter.length; i++)
+	    {
+	        for(int j = 0; j < laplacianFilter.length; j++)
+	        {
+	            Color pixelColor = imageReader.getColor(topLeftX + i, topLeftY + j);
+	            int brightness = (int)(BYTE_LIMIT*(pixelColor.getBlue() + 
+	                    pixelColor.getRed() + pixelColor.getGreen())/3);
+	            sum += brightness * laplacianFilter[i][j];
+	        }
+	    }
+	    
+	    return sum;
+	}
+	
+	public boolean canFilterBeCentredOn(Image image, int x, int y)
+	{
+	    int halfLengthOfFilter = laplacianFilter.length/2;
+	    if(x < halfLengthOfFilter || y < halfLengthOfFilter)
+	    {
+	        return false;
+	    }
+	    else if(x >= image.getWidth() - halfLengthOfFilter || y >= image.getHeight() - halfLengthOfFilter)
+	    {
+	        return false;
+	    }
+	    else
+	    {
+	        return true;
+	    }
 	}
 	
 	public static void main(String[] args)
