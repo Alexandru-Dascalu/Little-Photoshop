@@ -330,9 +330,9 @@ public class Photoshop extends Application
 	    Label gammaInputLabel = new Label("If desired value is out of slider range, type it here:");
         TextField gammaInput = new TextField();
         
-        Text validInputText = new Text("Invalid Gamma Input! Type in a floating point number!");
+        Label validInputText = new Label("Invalid Gamma Input! Type in a floating point number!");
         validInputText.setVisible(false);
-        validInputText.setFill(Color.FIREBRICK);
+        validInputText.setTextFill(Color.FIREBRICK);
         
         gammaInput.setText("1");
         
