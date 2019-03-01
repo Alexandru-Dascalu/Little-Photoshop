@@ -41,6 +41,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Photoshop extends Application
@@ -324,13 +325,21 @@ public class Photoshop extends Application
 	    
 	    BorderPane allGammaInputs = new BorderPane();
 	    HBox manualGammaInput = new HBox(5);
+	    VBox topChild = new VBox(5);
 	    
 	    Label gammaInputLabel = new Label("If desired value is out of slider range, type it here:");
         TextField gammaInput = new TextField();
+        
+        Text validInputText = new Text("Invalid Gamma Input! Type in a floating point number!");
+        validInputText.setVisible(false);
+        validInputText.setFill(Color.FIREBRICK);
+        
         gammaInput.setText("1");
         
         manualGammaInput.getChildren().addAll(gammaInputLabel, gammaInput);
         manualGammaInput.setAlignment(Pos.CENTER);
+        topChild.getChildren().addAll(manualGammaInput, validInputText);
+        topChild.setAlignment(Pos.CENTER);
         
         Slider gammaSlider = new Slider(0, 10, 1);
         gammaSlider.setShowTickMarks(true);
@@ -353,15 +362,16 @@ public class Photoshop extends Application
                 gammaValue = Double.parseDouble(newValue);
                 computeGammaLookUpTable();
                 imageView.setImage(gammaCorrecter(originalImage));
+                validInputText.setVisible(false);
             }
             catch(NumberFormatException e)
             {
-                
+                validInputText.setVisible(true);
             }
         });
         
         allGammaInputs.setCenter(gammaSlider);
-        allGammaInputs.setTop(manualGammaInput);
+        allGammaInputs.setTop(topChild);
         allGammaInputs.setPadding(new Insets(30, 30, 30, 30));
         
         Scene gammaInputScene = new Scene(allGammaInputs, 1000, 300);
