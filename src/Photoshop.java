@@ -51,7 +51,11 @@ public class Photoshop extends Application
 
 	private int[] contrastLookupTable;
 	        
-	private static final int[][] laplacianFilter = {{-4,-1,0,-1,-4}, {-1,2,3,2,-1}, {0,3,4,3,0}, {-1,2,3,2,-1}, {-4,-1,0,-1,-4}};
+	private static final int[][] laplacianFilter = {{-4,-1,0,-1,-4}, 
+	                                                {-1,2,3,2,-1}, 
+	                                                {0,3,4,3,0}, 
+	                                                {-1,2,3,2,-1}, 
+	                                                {-4,-1,0,-1,-4}};
 	private double gammaValue;
 	
 	private int r1;
@@ -94,7 +98,6 @@ public class Photoshop extends Application
 		Button cc_button = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
 		Button setContrastValueBtn = new Button("Set contrast values");
-		
 
 		// Add all the event handlers (this is a minimal GUI - you may try to do
 		// better)
@@ -533,7 +536,8 @@ public class Photoshop extends Application
                 int brightness = (red + blue + green)/3;
                 histogram[3][brightness]++;
                 
-                int value = (int)(color.getBrightness()*BYTE_LIMIT);
+                HSVColor hsvColor = new HSVColor(color.getRed(), color.getGreen(), color.getBlue());
+                int value = (int)(hsvColor.getValue() * BYTE_LIMIT);
                 histogram[4][value]++;
             }
         }
@@ -826,6 +830,7 @@ public class Photoshop extends Application
 	        }
 	    }
 	    
+	    System.out.println("max "+max+"min "+min);
 	    int halfOfFilterSize = laplacianFilter.length/2;
 	    for(int y = halfOfFilterSize; y < image.getHeight() - halfOfFilterSize; y++)
 	    {
@@ -890,7 +895,8 @@ public class Photoshop extends Application
 	    {
 	        return false;
 	    }
-	    else if(x >= image.getWidth() - halfLengthOfFilter || y >= image.getHeight() - halfLengthOfFilter)
+	    else if(x >= image.getWidth() - halfLengthOfFilter || 
+	            y >= image.getHeight() - halfLengthOfFilter)
 	    {
 	        return false;
 	    }
