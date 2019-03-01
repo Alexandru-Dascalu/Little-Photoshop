@@ -13,9 +13,7 @@ All of those functions must be written by yourself
 You may use libraries to achieve a better GUI
 */
 import java.io.FileInputStream;
-import javafx.scene.chart.XYChart;
 import java.io.FileNotFoundException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -23,11 +21,13 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
@@ -98,7 +98,6 @@ public class Photoshop extends Application
 		Button histogramButton = new Button("Histograms");
 		Button cc_button = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
-		Button setContrastValueBtn = new Button("Set contrast values");
 
 		// Add all the event handlers (this is a minimal GUI - you may try to do
 		// better)
@@ -136,22 +135,10 @@ public class Photoshop extends Application
 			{
 				System.out.println("Contrast Stretching");
 				
-				long start = System.currentTimeMillis();
-				Image stretchedImage = contrastStretcher(image);
-				imageView.setImage(stretchedImage);
-				System.out.println(System.currentTimeMillis() - start);
+				makeContrastInputWindow(imageView);
 			}
 		});
 		
-		setContrastValueBtn.setOnAction(new EventHandler<ActionEvent>()
-		{
-			@Override
-			public void handle(ActionEvent event)
-			{
-				makeContrastInputWindow();
-			}
-		});
-
 		histogramButton.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
@@ -192,12 +179,8 @@ public class Photoshop extends Application
 		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
 				histogramButton, cc_button, resetButton);
 
-		VBox inputs = new VBox(5);
-		inputs.getChildren().addAll(setContrastValueBtn);
-		
 		root.setTop(topElements);
 		root.setCenter(imageView);
-		root.setRight(inputs);
 
 		// Display to user
 		Scene scene = new Scene(root, 1024, 768);
@@ -439,15 +422,49 @@ public class Photoshop extends Application
         }
     }
 	
-	public void makeContrastInputWindow()
+	public void makeContrastInputWindow(ImageView imageView)
 	{
 		Stage contrastInput = new Stage();
 		contrastInput.setHeight(800);
-		contrastInput.setWidth(800);
+		contrastInput.setWidth(1400);
 		contrastInput.setTitle("Contrast Stretch Values Input");
 		
-		NumberAxis xAxis = new NumberAxis("Input", 0, 255, 25);
-		NumberAxis yAxis = new NumberAxis("Output", 0, 255, 25);
+		GridPane valuesPane = new GridPane();
+		valuesPane.setHgap(5);
+		valuesPane.setVgap(5);
+		valuesPane.setAlignment(Pos.TOP_CENTER);
+		valuesPane.setPadding(new Insets(20, 20, 20, 20));
+		
+		Label r1Label = new Label("R1 Value:");
+		Label s1Label = new Label("S1 Value:");
+		Label r2Label = new Label("R2 Value:");
+		Label s2Label = new Label("S2 Value:");
+		
+		valuesPane.add(r1Label, 0, 0);
+		valuesPane.add(s1Label, 0, 1);
+		valuesPane.add(r2Label, 0, 2);
+		valuesPane.add(s2Label, 0, 3);
+		
+		Text r1Text = new Text(r1 + "");
+		Text s1Text = new Text(s1 + "");
+		Text r2Text = new Text(r2 + "");
+		Text s2Text = new Text(s2 + "");
+		
+		valuesPane.add(r1Text, 1, 0);
+		valuesPane.add(s1Text, 1, 1);
+		valuesPane.add(r2Text, 1, 2);
+		valuesPane.add(s2Text, 1, 3);
+		
+		Button applyContrastBtn = new Button("Apply Contrast Stretching");
+		valuesPane.add(applyContrastBtn, 0, 4, 2, 1);
+		
+		Text contrastSuccess = new Text("Contrast Strecthing applied succesfully!");
+		contrastSuccess.setFill(Color.GREEN);
+		contrastSuccess.setVisible(false);
+		valuesPane.add(contrastSuccess, 0, 5, 2, 1);
+		
+		NumberAxis xAxis = new NumberAxis("Input", 0, BYTE_LIMIT, 25);
+		NumberAxis yAxis = new NumberAxis("Output", 0, BYTE_LIMIT, 25);
 		
 		LineChart<Number, Number> contrastInputChart = new LineChart<>(xAxis, yAxis);
 		
@@ -472,6 +489,8 @@ public class Photoshop extends Application
 		    @Override
 		    public void handle(MouseEvent m)
 		    {
+		        contrastSuccess.setVisible(false);
+                
 		        Number newX = xAxis.getValueForDisplay(m.getSceneX() - 60);
                 Number newY = yAxis.getValueForDisplay(m.getSceneY() - 8);
                 
@@ -481,6 +500,8 @@ public class Photoshop extends Application
                 r1 = newX.intValue();
                 s1 = newY.intValue();
                 
+                r1Text.setText(r1 + "");
+                s1Text.setText(s1 + "");
                 computeContrastLookUpTable();
 		    }
 		});
@@ -490,6 +511,8 @@ public class Photoshop extends Application
             @Override
             public void handle(MouseEvent m)
             {
+                contrastSuccess.setVisible(false);
+                
                 Number newX = xAxis.getValueForDisplay(m.getSceneX() - 60);
                 Number newY = yAxis.getValueForDisplay(m.getSceneY() - 8);
                 
@@ -499,11 +522,23 @@ public class Photoshop extends Application
                 r2 = newX.intValue();
                 s2 = newY.intValue();
                 
+                r2Text.setText(r2 + "");
+                s2Text.setText(s2 + "");
                 computeContrastLookUpTable();
             }
         });
 		
-		Scene contrastInputScene = new Scene(contrastInputChart, 800, 800);
+		applyContrastBtn.setOnAction(e ->
+		{
+		    imageView.setImage(contrastStretcher(imageView.getImage()));
+		    contrastSuccess.setVisible(true);
+		});
+		
+		BorderPane contrastInputPane = new BorderPane();
+		contrastInputPane.setCenter(contrastInputChart);
+		contrastInputPane.setRight(valuesPane);
+		
+		Scene contrastInputScene = new Scene(contrastInputPane, 1400, 800);
 		contrastInput.setScene(contrastInputScene);
 		contrastInput.show();
 	}
