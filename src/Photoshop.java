@@ -64,6 +64,11 @@ public class Photoshop extends Application
 	private int r2;
 	private int s2;
 
+	public static void main(String[] args)
+    {
+        launch();
+    }
+	
 	public Photoshop()
 	{
 		gammaValue = 1.0;
@@ -189,15 +194,18 @@ public class Photoshop extends Application
 	}
 
 	// Example function of invert
-	public Image imageInverter(Image image)
+	private Image imageInverter(Image image)
 	{
 		// Find the width and height of the image to be process
 		int width = (int) image.getWidth();
 		int height = (int) image.getHeight();
+		
 		// Create a new image of that width and height
 		WritableImage inverted_image = new WritableImage(width, height);
+		
 		// Get an interface to write to that image memory
 		PixelWriter inverted_image_writer = inverted_image.getPixelWriter();
+		
 		// Get an interface to read from the original image passed as the
 		// parameter to the function
 		PixelReader image_reader = image.getPixelReader();
@@ -239,7 +247,7 @@ public class Photoshop extends Application
 		return gammaLookupTable[integerColour];
 	}
 
-	public Image gammaCorrecter(Image image)
+	private Image gammaCorrecter(Image image)
 	{
 		int width = (int) image.getWidth();
 		int height = (int) image.getHeight();
@@ -268,7 +276,7 @@ public class Photoshop extends Application
 		return correctedImage;
 	}
 
-	public Image gammaCorrecter(Image image, double gammaValue)
+	private Image gammaCorrecter(Image image, double gammaValue)
 	{
 		int width = (int) image.getWidth();
 		int height = (int) image.getHeight();
@@ -297,7 +305,7 @@ public class Photoshop extends Application
 		return correctedImage;
 	}
 	
-	public void showGammaInput(ImageView imageView, Image originalImage)
+	private void showGammaInput(ImageView imageView, Image originalImage)
 	{
 	    Stage gammaWindow = new Stage();
 	    gammaWindow.setWidth(800);
@@ -362,7 +370,7 @@ public class Photoshop extends Application
         gammaWindow.show();
 	}
 	
-	public Image contrastStretcher(Image image)
+	private Image contrastStretcher(Image image)
 	{
 		int width = (int) image.getWidth();
 		int height = (int) image.getHeight();
@@ -391,7 +399,7 @@ public class Photoshop extends Application
 		return correctedImage;
 	}
 
-	public int getContrastStretchedValue(double colourValue)
+	private int getContrastStretchedValue(double colourValue)
 	{
 		int colour = (int)(colourValue * BYTE_LIMIT);
 		return contrastLookupTable[colour]; 
@@ -422,7 +430,7 @@ public class Photoshop extends Application
         }
     }
 	
-	public void makeContrastInputWindow(ImageView imageView)
+	private void makeContrastInputWindow(ImageView imageView)
 	{
 		Stage contrastInput = new Stage();
 		contrastInput.setHeight(800);
@@ -543,7 +551,7 @@ public class Photoshop extends Application
 		contrastInput.show();
 	}
 	
-	public int[][] getHistogram(Image image)
+	private int[][] getHistogram(Image image)
 	{
         // Find the width and height of the image to be process
         int width = (int) image.getWidth();
@@ -590,7 +598,7 @@ public class Photoshop extends Application
         return histogram;
 	}
 	
-	public int getMaxFromHistogram(int[] histogram)
+	private int getMaxFromHistogram(int[] histogram)
 	{
 	    int max=0;
 	    for(int i=0; i<histogram.length; i++)
@@ -604,7 +612,7 @@ public class Photoshop extends Application
 	    return max;
 	}
 	
-	public XYChart.Series<Number, Number> getHistogramSeries(int[][] histogram, Color color)
+	private XYChart.Series<Number, Number> getHistogramSeries(int[][] histogram, Color color)
 	{
 	    XYChart.Series<Number, Number> intensityLevelCount = new XYChart.Series<>();
 	    
@@ -648,7 +656,7 @@ public class Photoshop extends Application
 	    return intensityLevelCount;
 	}
 	
-	public AreaChart<Number, Number> getHistogramChart(int[][] histogram)
+	private AreaChart<Number, Number> getHistogramChart(int[][] histogram)
 	{
 	    
         int maxValue = getMaxFromHistogram(histogram[0]);
@@ -674,7 +682,7 @@ public class Photoshop extends Application
         return histogramChart;
 	}
 	
-	public void showHistograms(ImageView imageView)
+	private void showHistograms(ImageView imageView)
 	{
 	    Image image = imageView.getImage();
 	    Stage histogramWindow = new Stage();
@@ -810,7 +818,7 @@ public class Photoshop extends Application
 	    return brightnessMapping;
 	}
 	
-	public Image getEqualizedImage(Image image, int[] brightnessMapping)
+	private Image getEqualizedImage(Image image, int[] brightnessMapping)
 	{
         int width = (int) image.getWidth();
         int height = (int) image.getHeight();
@@ -844,7 +852,7 @@ public class Photoshop extends Application
         return equalizedImage;
 	}
 	
-	public Image getCrossCorelatedImage(Image image)
+	private Image getCrossCorelatedImage(Image image)
 	{
 	    int[][] pixelSums = new int[(int)image.getHeight()][(int)image.getWidth()];
 	    
@@ -890,7 +898,7 @@ public class Photoshop extends Application
 	    return getGreyScaleImage(pixelSums);
 	}
 	
-	public Image getGreyScaleImage(int[][] pixelValues)
+	private Image getGreyScaleImage(int[][] pixelValues)
 	{
 	    // Create a new image of that width and height
         WritableImage greyImage = new WritableImage(pixelValues[0].length, 
@@ -912,7 +920,7 @@ public class Photoshop extends Application
         return greyImage;
 	}
 	
-	public int getPixelProductSum(Image image, int x, int y)
+	private int getPixelProductSum(Image image, int x, int y)
 	{
 	    int topLeftX = x - laplacianFilter.length/2;
 	    int topLeftY = y - laplacianFilter.length/2;
@@ -933,7 +941,7 @@ public class Photoshop extends Application
 	    return sum;
 	}
 	
-	public boolean canFilterBeCentredOn(Image image, int x, int y)
+	private boolean canFilterBeCentredOn(Image image, int x, int y)
 	{
 	    int halfLengthOfFilter = laplacianFilter.length/2;
 	    if(x < halfLengthOfFilter || y < halfLengthOfFilter)
@@ -949,10 +957,5 @@ public class Photoshop extends Application
 	    {
 	        return true;
 	    }
-	}
-	
-	public static void main(String[] args)
-	{
-		launch();
 	}
 }
