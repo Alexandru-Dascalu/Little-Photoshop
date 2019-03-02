@@ -1,0 +1,10 @@
+.root {
+     -fx-background-color: #343434;
+}
+
+.button {
+    -fx-text-fill: black;
+    -fx-background-radius: 8;
+    -fx-background-color: linear-gradient(#32cd32, #228b22);
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.75) , 4,0,0,1 );
+}

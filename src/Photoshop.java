@@ -189,6 +189,7 @@ public class Photoshop extends Application
 
 		// Display to user
 		Scene scene = new Scene(root, 1024, 768);
+		scene.getStylesheets().add(Photoshop.class.getResource("Photoshop.css").toExternalForm());
 		stage.setScene(scene);
 		stage.show();
 	}
