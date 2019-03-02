@@ -97,16 +97,16 @@ public class Photoshop extends Application
 		//imageView.setFitHeight(800);
 		
 		// Create the simple GUI
-		Button invert_button = new Button("Invert");
-		Button gamma_button = new Button("Gamma Correct");
-		Button contrast_button = new Button("Contrast Stretching");
+		Button invertButton = new Button("Invert");
+		Button gammaButton = new Button("Gamma Correct");
+		Button contrastButton = new Button("Contrast Stretching");
 		Button histogramButton = new Button("Histograms");
-		Button cc_button = new Button("Cross Correlation");
+		Button ccButton = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
 
 		// Add all the event handlers (this is a minimal GUI - you may try to do
 		// better)
-		invert_button.setOnAction(new EventHandler<ActionEvent>()
+		invertButton.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent event)
@@ -124,7 +124,7 @@ public class Photoshop extends Application
 			}
 		});
 
-		gamma_button.setOnAction(new EventHandler<ActionEvent>()
+		gammaButton.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent event)
@@ -133,7 +133,7 @@ public class Photoshop extends Application
 			}
 		});
 
-		contrast_button.setOnAction(new EventHandler<ActionEvent>()
+		contrastButton.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent event)
@@ -153,7 +153,7 @@ public class Photoshop extends Application
 			}
 		});
 
-		cc_button.setOnAction(new EventHandler<ActionEvent>()
+		ccButton.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent event)
@@ -181,8 +181,8 @@ public class Photoshop extends Application
 		// Gaps between buttons
 		
 		// Add all the buttons and the image for the GUI
-		topElements.getChildren().addAll(invert_button, gamma_button, contrast_button,
-				histogramButton, cc_button, resetButton);
+		topElements.getChildren().addAll(invertButton, gammaButton, contrastButton,
+				histogramButton, ccButton, resetButton);
 
 		root.setTop(topElements);
 		root.setCenter(imageView);
