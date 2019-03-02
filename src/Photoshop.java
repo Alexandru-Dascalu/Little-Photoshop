@@ -857,7 +857,7 @@ public class Photoshop extends Application
 	{
 	    int[][] pixelSums = new int[(int)image.getHeight()][(int)image.getWidth()];
 	    
-	    int max = 0;
+	    int max = Integer.MIN_VALUE;
 	    int min = Integer.MAX_VALUE;
 	    for(int y=0; y<image.getHeight(); y++)
 	    {
@@ -879,7 +879,7 @@ public class Photoshop extends Application
 	            }
 	            else
 	            {
-	                pixelSums[y][x] = BYTE_LIMIT;
+	                pixelSums[y][x] = 0;
 	            }
 	        }
 	    }
@@ -901,11 +901,9 @@ public class Photoshop extends Application
 	
 	private Image getGreyScaleImage(int[][] pixelValues)
 	{
-	    // Create a new image of that width and height
         WritableImage greyImage = new WritableImage(pixelValues[0].length, 
             pixelValues.length);
         
-        // Get an interface to write to that image memory
         PixelWriter imageWriter = greyImage.getPixelWriter();
         
         for(int y = 0; y < pixelValues.length; y++)
