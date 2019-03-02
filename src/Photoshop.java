@@ -1,17 +1,3 @@
-
-/*
-CS-255 Getting started code for the assignment
-I do not give you permission to post this code online
-Do not post your solution online
-Do not copy code
-Do not use JavaFX functions or other libraries to do the main parts of the assignment:
-	Gamma Correction
-	Contrast Stretching
-	Histogram calculation and equalisation
-	Cross correlation
-All of those functions must be written by yourself
-You may use libraries to achieve a better GUI
-*/
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -44,6 +30,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+/**
+ * Name: Alexandru Dascalu
+ * Student ID 965337
+ * @author Alexandru Dascalu
+ * 
+ * I declare that this class is my own piece of work, and that I did not copy any
+ * of the functions that change the graphics of the image from a colleague or 
+ * from the Internet, nor have I looked at any piece of code of any of my coursemates.
+ */
 public class Photoshop extends Application
 {
 	private static final int BYTE_LIMIT = 255;
@@ -566,7 +561,7 @@ public class Photoshop extends Application
         
         for(int i=0; i < 5; i++)
         {
-            for(int j=0; j < BYTE_LIMIT+1; j++)
+            for(int j=0; j <= BYTE_LIMIT; j++)
             {
                 histogram[i][j] = 0;
             }

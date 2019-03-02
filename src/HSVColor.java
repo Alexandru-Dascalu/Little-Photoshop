@@ -1,4 +1,13 @@
 
+/**
+ * Name: Alexandru Dascalu
+ * Student ID 965337
+ * @author Alexandru Dascalu
+ * 
+ * I declare that this class is my own piece of work, and that I did not copy any
+ * of the functions that change the graphics of the image from a colleague or 
+ * from the Internet, nor have I looked at any piece of code of any of my coursemates.
+ */
 public class HSVColor 
 {
     private double hue;
