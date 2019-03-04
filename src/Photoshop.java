@@ -41,22 +41,37 @@ import javafx.stage.Stage;
  */
 public class Photoshop extends Application
 {
+    /**The maximum value of a color channel. Used in many computations.*/
 	private static final int BYTE_LIMIT = 255;
 
+	/**The array that holds the precomputed brightness mapping for a given gamma 
+	 * value.*/
 	private int[] gammaLookupTable;
 
+	/**The array that holds the pre-computed brightness mapping for the given 4 
+	 * contrast stretch values.*/
 	private int[] contrastLookupTable;
-	        
+	   
+	/**The Filter used for cross corelation.*/
 	private static final int[][] laplacianFilter = {{-4,-1,0,-1,-4}, 
 	                                                {-1,2,3,2,-1}, 
 	                                                {0,3,4,3,0}, 
 	                                                {-1,2,3,2,-1}, 
 	                                                {-4,-1,0,-1,-4}};
+	
+	/**The value of the gamma variable used in gamma correction, set by the user.*/
 	private double gammaValue;
 	
+	/**X axis value of the first point used for contrast stretching.*/
 	private int r1;
+	
+	/**Y axis value of the first point used for contrast stretching.*/
 	private int s1;
+	
+	/**X axis value of the second point used for contrast stretching.*/
 	private int r2;
+	
+	/**Y axis value of the second point used for contrast stretching.*/
 	private int s2;
 
 	public static void main(String[] args)
@@ -64,6 +79,10 @@ public class Photoshop extends Application
         launch();
     }
 	
+	/**
+	 * Makes a new Photoshop application. Initialises the gammaValue and contrast 
+	 * input values, as well the lookup tables for gamma correction and contrast stretching.
+	 */
 	public Photoshop()
 	{
 		gammaValue = 1.0;
@@ -71,13 +90,18 @@ public class Photoshop extends Application
 		computeGammaLookUpTable();
 		
 		contrastLookupTable = new int[BYTE_LIMIT+1];
-		computeContrastLookUpTable();
 		r1 = 40;
-		s1 = 40;
-		r2 = 215;
-		s2 = 215;
+        s1 = 40;
+        r2 = 215;
+        s2 = 215;
+		computeContrastLookUpTable();
 	}
 
+	/**
+	 * Addes all the graphical elements to the main window of the application
+	 *  and shows it.
+	 *  @param stage The stage given by the JavaFX system.
+	 */
 	@Override
 	public void start(Stage stage) throws FileNotFoundException
 	{
@@ -88,8 +112,11 @@ public class Photoshop extends Application
 
 		// Create the graphical view of the image
 		ImageView imageView = new ImageView(image);
-		//imageView.setFitWidth(1000);
-		//imageView.setFitHeight(800);
+		if(image.getHeight() > 800 && image.getWidth() > 1000)
+		{
+		    imageView.setFitWidth(1000);
+	        imageView.setFitHeight(800);
+		}
 		
 		// Create the simple GUI
 		Button invertButton = new Button("Invert");
@@ -99,8 +126,6 @@ public class Photoshop extends Application
 		Button ccButton = new Button("Cross Correlation");
 		Button resetButton = new Button("Reset Image");
 
-		// Add all the event handlers (this is a minimal GUI - you may try to do
-		// better)
 		invertButton.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
@@ -168,12 +193,10 @@ public class Photoshop extends Application
 			}
 		});
 
-		// Using a flow pane
 		BorderPane root = new BorderPane();
 
 		HBox topElements = new HBox(5);
 		topElements.setAlignment(Pos.CENTER);
-		// Gaps between buttons
 		
 		// Add all the buttons and the image for the GUI
 		topElements.getChildren().addAll(invertButton, gammaButton, contrastButton,
@@ -183,13 +206,17 @@ public class Photoshop extends Application
 		root.setCenter(imageView);
 
 		// Display to user
-		Scene scene = new Scene(root, 1024, 768);
+		Scene scene = new Scene(root, 1600, 900);
 		scene.getStylesheets().add(Photoshop.class.getResource("Photoshop.css").toExternalForm());
 		stage.setScene(scene);
 		stage.show();
 	}
 
-	// Example function of invert
+	/**
+	 * Makes an image that is the an inversion of the given image.
+	 * @param image The image we want ot invert.
+	 * @return A new image that is the inverted version of the given image.
+	 */
 	private Image imageInverter(Image image)
 	{
 		// Find the width and height of the image to be process
@@ -213,21 +240,18 @@ public class Photoshop extends Application
 			{
 				// For each pixel, get the colour
 				Color color = image_reader.getColor(x, y);
-				// Do something (in this case invert) - the getColor function
-				// returns colours as 0..1 doubles (we could multiply by 255 if
-				// we want 0-255 colours)
 				color = Color.color(1.0 - color.getRed(), 1.0 - color.getGreen(), 1.0 - color.getBlue());
-				// Note: for gamma correction you may not need the divide by 255
-				// since getColor already returns 0-1, nor may you need multiply
-				// by 255 since the Color.color function consumes 0-1 doubles.
-
-				// Apply the new colour
+				
 				inverted_image_writer.setColor(x, y, color);
 			}
 		}
 		return inverted_image;
 	}
 
+	/**
+	 * Pre-computes the gamma brightness mapping for each level between 0 and 
+	 * 255 based on the current gamma value.
+	 */
 	private void computeGammaLookUpTable()
 	{
 		for (int i = 0; i <= BYTE_LIMIT; i++)
@@ -272,6 +296,13 @@ public class Photoshop extends Application
 		return correctedImage;
 	}
 
+	/**
+	 * Makes a new image that is a gamma corrected version of the given image, 
+	 * based on the given gamma value.
+	 * @param image The image we want to correct
+	 * @param gammaValue The gamma value we want to use.
+	 * @return A new gamma corrected image based on the given image and gamma correction value.
+	 */
 	private Image gammaCorrecter(Image image, double gammaValue)
 	{
 		int width = (int) image.getWidth();
