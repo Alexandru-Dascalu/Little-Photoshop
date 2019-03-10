@@ -7,6 +7,10 @@
  * I declare that this class is my own piece of work, and that I did not copy any
  * of the functions that change the graphics of the image from a colleague or 
  * from the Internet, nor have I looked at any piece of code of any of my coursemates.
+ * 
+ * This class models a color in the HSV model, it is made of three RGB values 
+ * and manually converts it to HSV using standard conversion algorithm, not 
+ * the JavaFX implementation.
  */
 public class HSVColor 
 {

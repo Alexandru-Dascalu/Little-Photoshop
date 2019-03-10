@@ -616,6 +616,8 @@ public class Photoshop extends Application
                 int brightness = (red + blue + green)/3;
                 histogram[3][brightness]++;
                 
+                /*Get the brightness of the color in the HSV model for accurate
+                 * equalization on the coloured image.*/  
                 HSVColor hsvColor = new HSVColor(color.getRed(), color.getGreen(), color.getBlue());
                 int value = (int)(hsvColor.getValue() * BYTE_LIMIT);
                 histogram[4][value]++;
@@ -885,6 +887,10 @@ public class Photoshop extends Application
 	    
 	    int max = Integer.MIN_VALUE;
 	    int min = Integer.MAX_VALUE;
+	    
+	    /*I am doing cross correlation on the grey scale version of the image, 
+	     * so I average the RGB channels of a pixel before applying the
+	     * algorithm.*/
 	    for(int y=0; y<image.getHeight(); y++)
 	    {
 	        for(int x=0; x<image.getWidth(); x++)
