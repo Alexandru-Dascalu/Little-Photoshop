@@ -721,11 +721,6 @@ public class Photoshop extends Application
 	    
 	    int[][] histogram = getHistogram(image);
 	    AreaChart<Number, Number> histogramChart = getHistogramChart(histogram);
-	    
-        /*XYChart.Series<Number, Number> redLevelCount = histogramChart.getData().get(0);
-        XYChart.Series<Number, Number> greenLevelCount = histogramChart.getData().get(2);
-        XYChart.Series<Number, Number> blueLevelCount = histogramChart.getData().get(3);
-        XYChart.Series<Number, Number> brightnessLevelCount = histogramChart.getData().get(1);*/
         
         BorderPane histogramPane = new BorderPane();
         histogramPane.setCenter(histogramChart);
