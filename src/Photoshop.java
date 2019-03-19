@@ -214,7 +214,7 @@ public class Photoshop extends Application
 
 	/**
 	 * Makes an image that is the an inversion of the given image.
-	 * @param image The image we want ot invert.
+	 * @param image The image we want to invert.
 	 * @return A new image that is the inverted version of the given image.
 	 */
 	private Image imageInverter(Image image)
