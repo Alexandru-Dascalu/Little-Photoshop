@@ -878,7 +878,7 @@ public class Photoshop extends Application
 	
 	private Image getCrossCorelatedImage(Image image)
 	{
-	    int[][] pixelSums = new int[(int)image.getHeight()][(int)image.getWidth()];
+	    int[][][] pixelSums = new int[3][(int)image.getHeight()][(int)image.getWidth()];
 	    
 	    int max = Integer.MIN_VALUE;
 	    int min = Integer.MAX_VALUE;
@@ -892,53 +892,61 @@ public class Photoshop extends Application
 	        {
 	            if(canFilterBeCentredOn(image, x, y))
 	            {
-	                pixelSums[y][x] = getPixelProductSum(image, x, y);
-	                
-	                if(pixelSums[y][x] > max)
+	                for(int k = 0; k < 3; k++) 
 	                {
-	                    max = pixelSums[y][x];
-	                }
-	                
-	                if(pixelSums[y][x] < min)
-	                {
-	                    min = pixelSums[y][x];
+	                    pixelSums[k][y][x] = getPixelProductSum(image, k, x, y);
+	                    
+	                    if(pixelSums[k][y][x] > max)
+	                    {
+	                        max = pixelSums[k][y][x];
+	                    }
+	                    
+	                    if(pixelSums[k][y][x] < min)
+	                    {
+	                        min = pixelSums[k][y][x];
+	                    }
 	                }
 	            }
 	            else
 	            {
-	                pixelSums[y][x] = 0;
+	                pixelSums[0][y][x] = 0;
+	                pixelSums[1][y][x] = 0;
+	                pixelSums[2][y][x] = 0;
 	            }
 	        }
 	    }
 	    
-	    System.out.println("max "+max+"min "+min);
+	    System.out.println("max "+max+" min "+min);
 	    int halfOfFilterSize = laplacianFilter.length/2;
 	    for(int y = halfOfFilterSize; y < image.getHeight() - halfOfFilterSize; y++)
 	    {
 	        for(int x = halfOfFilterSize; x < image.getWidth() - halfOfFilterSize; x++)
 	        {
-	            int normalisedValue = (pixelSums[y][x] - min)*BYTE_LIMIT/(max - min);
-	            pixelSums[y][x] = normalisedValue;
+	            for(int k = 0; k < 3; k++)
+	            {
+	                int normalisedValue = (pixelSums[k][y][x] - min)*BYTE_LIMIT/(max - min);
+	                pixelSums[k][y][x] = normalisedValue;
+	            }
 	        }
 	    }
 	    
 	    
-	    return getGreyScaleImage(pixelSums);
+	    return getNewImageImage(pixelSums);
 	}
 	
-	private Image getGreyScaleImage(int[][] pixelValues)
+	private Image getNewImageImage(int[][][] pixelValues)
 	{
-        WritableImage greyImage = new WritableImage(pixelValues[0].length, 
-            pixelValues.length);
+        WritableImage greyImage = new WritableImage(pixelValues[0][0].length, 
+            pixelValues[0].length);
         
         PixelWriter imageWriter = greyImage.getPixelWriter();
         
-        for(int y = 0; y < pixelValues.length; y++)
+        for(int y = 0; y < pixelValues[0].length; y++)
         {
-            for(int x = 0; x < pixelValues[0].length; x++)
+            for(int x = 0; x < pixelValues[0][0].length; x++)
             {
-                Color newColor = Color.rgb(pixelValues[y][x], pixelValues[y][x],
-                    pixelValues[y][x]);
+                Color newColor = Color.rgb(pixelValues[0][y][x], pixelValues[1][y][x],
+                    pixelValues[2][y][x]);
                 imageWriter.setColor(x, y, newColor);
             }
         }
@@ -946,7 +954,7 @@ public class Photoshop extends Application
         return greyImage;
 	}
 	
-	private int getPixelProductSum(Image image, int x, int y)
+	private int getPixelProductSum(Image image, int rgb, int x, int y)
 	{
 	    int topLeftX = x - laplacianFilter.length/2;
 	    int topLeftY = y - laplacianFilter.length/2;
@@ -958,8 +966,25 @@ public class Photoshop extends Application
 	        for(int j = 0; j < laplacianFilter.length; j++)
 	        {
 	            Color pixelColor = imageReader.getColor(topLeftX + i, topLeftY + j);
-	            int brightness = (int)(BYTE_LIMIT*(pixelColor.getBlue() + 
-	                    pixelColor.getRed() + pixelColor.getGreen())/3);
+	            int brightness;
+	            
+	            if(rgb == 0) 
+	            {
+	                brightness = (int)(BYTE_LIMIT * pixelColor.getRed());
+	            } 
+	            else if(rgb == 1) 
+	            {
+	                brightness = (int)(BYTE_LIMIT * pixelColor.getGreen());
+	            } 
+	            else if( rgb == 2) 
+	            {
+	                brightness = (int)(BYTE_LIMIT * pixelColor.getBlue());
+	            } 
+	            else 
+	            {
+	                throw new IllegalArgumentException("rgb argument can only be 0, 1 or 2 !");
+	            }
+	            
 	            sum += brightness * laplacianFilter[i][j];
 	        }
 	    }
